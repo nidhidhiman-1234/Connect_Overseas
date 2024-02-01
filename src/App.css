@@ -9,7 +9,7 @@ body {
   font-size: 1rem;
   line-height: 1.5;
   letter-spacing: 0.00938em;
-  /* background-color: #fff; */
+  background-color: #fff;
   padding-left: 280px;
 }
 
@@ -36,7 +36,7 @@ button.MuiButtonBase-root.MuiIconButton-root.MuiIconButton-colorInherit.MuiIconB
   align-items: center;
   justify-content: center;
   font-size: calc(10px + 2vmin);
-  color: white;
+  /* color: white; */
 }
 
 .App-link {
