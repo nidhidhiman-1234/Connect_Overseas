@@ -1,0 +1,107 @@
+.App {
+  /* padding-left: 140px; */
+  font-family: Inter, sans-serif;
+}
+body {
+  margin: 0;
+  color: rgba(0, 0, 0, 0.87);
+  font-family: Inter, sans-serif;
+  font-weight: 400;
+  font-size: 1rem;
+  line-height: 1.5;
+  letter-spacing: 0.00938em;
+  background-color: #fff;
+  padding-left: 280px;
+}
+
+.App-logo {
+  height: 40vmin;
+  pointer-events: none;
+}
+
+
+button.MuiButtonBase-root.MuiIconButton-root.MuiIconButton-colorInherit.MuiIconButton-edgeStart {
+  margin-bottom: 55px;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .App-logo {
+    animation: App-logo-spin infinite 20s linear;
+  }
+}
+
+.App-header {
+  background-color: #282c34;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: calc(10px + 2vmin);
+  color: white;
+}
+
+.App-link {
+  color: #61dafb;
+}
+
+@keyframes App-logo-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* li.MuiListItem-root {
+  width: '12px';
+
+} */
+:where(.css-dev-only-do-not-override-dkbvqv).ant-input-affix-wrapper >input.ant-input {
+  padding: 0;
+  font-size: inherit;
+  border: none;
+  border-radius: 0;
+  outline: none;
+  background: none;
+}
+.css-1r7kz78-MuiModal-root-MuiDrawer-root .MuiDrawer-paper {
+  box-sizing: border-box;
+  width: 240px;
+  background: linear-gradient(180deg,  #24478B 0%, #033362 100%);
+}
+.css-d9ml5t-MuiDrawer-docked .MuiDrawer-paper {
+  box-sizing: border-box;
+  width: 240px;
+  background: linear-gradient(180deg,  #24478B 0%, #033362 100%);
+}
+.sidebar{
+  color: white;
+  text-align: center;
+  font-size: 16px;
+
+}
+.dashboard{
+  color:#24478B
+}
+
+.consellorlist{
+  color:#0e8f1f
+}
+.alignment{
+
+}
+
+.ant-input::placeholder {
+  color: black;
+  font-family: Inter, sans-serif;
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 24px;
+  letter-spacing: -0.022em;
+  text-align: left;
+}
+
+.pointer-cursor {
+  cursor: pointer;
+}

@@ -1,0 +1,65 @@
+{
+  "name": "adminpanel",
+  "version": "0.1.0",
+  "private": true,
+  "dependencies": {
+    "@ant-design/icons": "latest",
+    "@emotion/react": "latest",
+    "@emotion/styled": "latest",
+    "@firebase/firestore": "^4.4.0",
+    "@mui/icons-material": "^5.15.6",
+    "@mui/material": "latest",
+    "@react-native-firebase/app": "^18.7.3",
+    "@react-native-firebase/auth": "^18.7.3",
+    "@testing-library/jest-dom": "^5.17.0",
+    "@testing-library/react": "^13.4.0",
+    "@testing-library/user-event": "^13.5.0",
+    "@types/react": "latest",
+    "@types/react-dom": "latest",
+    "antd": "5.12.8",
+    "emoji-dictionary": "^1.0.11",
+    "firebase": "^10.7.1",
+    "firestore": "^1.1.6",
+    "moment": "^2.30.1",
+    "rc-pagination": "^4.0.4",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-emoji-picker": "^1.0.13",
+    "react-linkify": "^1.0.0-alpha",
+    "react-router-dom": "^6.21.3",
+    "react-scripts": "5.0.1",
+    "react-toastify": "^10.0.3",
+    "typescript": "latest",
+    "uuid": "^9.0.1",
+    "web-vitals": "^2.1.4"
+  },
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test",
+    "eject": "react-scripts eject"
+  },
+  "eslintConfig": {
+    "extends": [
+      "react-app",
+      "react-app/jest"
+    ]
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  },
+  "devDependencies": {
+    "eslint": "^8.56.0",
+    "eslint-plugin-jsx-a11y": "^6.8.0",
+    "eslint-plugin-react": "^7.33.2"
+  }
+}
