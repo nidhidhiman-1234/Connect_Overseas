@@ -24,9 +24,9 @@ const AddPost = ({}) => {
     try {
       const values = await form.validateFields();
 
-      if (values.title === undefined || values.content === undefined) {
-        throw new Error("Title and Content are required fields");
-      }
+      // if (values.title === undefined || values.content === undefined) {
+      //   throw new Error("Title and Content are required fields");
+      // }
 
       const newPost = {
         title: values.title,
@@ -64,6 +64,7 @@ const AddPost = ({}) => {
     }
   };
 
+  
   return (
     <div
       style={{
@@ -86,7 +87,7 @@ const AddPost = ({}) => {
         <Form.Item
           label="Title"
           name="title"
-          rules={[{ required: true, message: "Please enter the title" }]}
+          // rules={[{ required: true, message: "Please enter the title" }]}
         >
             {/* <CustomInputWithEmoji inputValue={inputValue} setInputValue={setInputValue} /> */}
          
@@ -95,7 +96,7 @@ const AddPost = ({}) => {
         <Form.Item
   label="Content"
   name="content"
-  rules={[{ required: true, message: "Please enter the content" }]}
+  // rules={[{ required: true, message: "Please enter the content" }]}
 >
   {/* <div style={{ display: "flex" }}>
     <CustomInputWithEmoji

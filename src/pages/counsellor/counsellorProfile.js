@@ -14,7 +14,7 @@ import {
 import { PlusOutlined } from "@ant-design/icons";
 import Layout from "../../layout/layout";
 import { firestore, storage } from "../../config/firebase";
-import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { ref, uploadBytes, getDownloadURL,deleteObject  } from "firebase/storage";
 import { v4 as uuidv4 } from "uuid";
 import moment from "moment";
 import {
@@ -23,6 +23,7 @@ import {
   addDoc,
   updateDoc,
   doc,
+  getDoc
 } from "firebase/firestore";
 
 import {
@@ -96,33 +97,80 @@ const UpdateCounsellor = ({}) => {
     fetchDataFromFirestore();
   }, []);
 
-  const handleFileInputChange = (e) => {
+  
+  // const handleFileInputChange = (e) => {
+  //   const selectedFile = e.target.files[0];
+  
+  //   if (selectedFile) {
+  //     const uniqueFilename = `${Date.now()}-${uuidv4()}`;
+  //     const storageRef = ref(storage, `avatars/${uniqueFilename}`);
+  
+  //     uploadBytes(storageRef, selectedFile)
+  //       .then((snapshot) => {
+  //         console.log("Image uploaded successfully:", snapshot);
+  //         return getDownloadURL(snapshot.ref);
+  //       })
+  //       .then((downloadURL) => {
+  //         console.log("Download URL:", downloadURL);
+  //         setSelectedImage(downloadURL);
+  
+  //         const adminDocRef = doc(firestore, "councellors", selectedUser.id);
+  
+  //         updateDoc(adminDocRef, {
+  //           image: downloadURL,
+  //         })
+  //           .then(() => {
+  //             console.log("Image URL updated in Firestore");
+  //           })
+  //           .catch((error) => {
+  //             console.error("Error updating image URL in Firestore:", error);
+  //           });
+  //       })
+  //       .catch((error) => {
+  //         console.error("Error uploading image:", error);
+  //       });
+  //   }
+  // };
+  
+
+  const handleFileInputChange = async (e) => {
     const selectedFile = e.target.files[0];
   
     if (selectedFile) {
+      let oldImageUrl = null;
+      const adminDocRef = doc(firestore, "councellors", selectedUser.id);
+      const adminDocSnapshot = await getDoc(adminDocRef);
+  
+      if (adminDocSnapshot.exists()) {
+        const data = adminDocSnapshot.data();
+        oldImageUrl = data.image || null;
+      }
+  
+      if (oldImageUrl) {
+        const oldImageRef = ref(storage, oldImageUrl);
+        try {
+          await deleteObject(oldImageRef);
+          console.log("Old image deleted successfully");
+        } catch (deleteError) {
+          console.error("Error deleting old image:", deleteError);
+        }
+      }
+  
       const uniqueFilename = `${Date.now()}-${uuidv4()}`;
       const storageRef = ref(storage, `avatars/${uniqueFilename}`);
   
       uploadBytes(storageRef, selectedFile)
-        .then((snapshot) => {
-          console.log("Image uploaded successfully:", snapshot);
-          return getDownloadURL(snapshot.ref);
-        })
+        .then((snapshot) => getDownloadURL(snapshot.ref))
         .then((downloadURL) => {
           console.log("Download URL:", downloadURL);
           setSelectedImage(downloadURL);
   
-          const adminDocRef = doc(firestore, "councellors", selectedUser.id);
-  
-          updateDoc(adminDocRef, {
+          return updateDoc(adminDocRef, {
             image: downloadURL,
-          })
-            .then(() => {
-              console.log("Image URL updated in Firestore");
-            })
-            .catch((error) => {
-              console.error("Error updating image URL in Firestore:", error);
-            });
+          });
+        })
+        .then(() => {
+          console.log("Image URL updated in Firestore");
         })
         .catch((error) => {
           console.error("Error uploading image:", error);
@@ -130,6 +178,7 @@ const UpdateCounsellor = ({}) => {
     }
   };
   
+
 
   const handleEditIconClick = (e) => {
     e.stopPropagation();
