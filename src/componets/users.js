@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Button, Table, Space, Input,Radio } from "antd";
+import { Button, Table, Space, Input,Radio,Modal } from "antd";
 import Layout from "../layout/layout";
 import { firestore }from "../config/firebase";
 
@@ -19,12 +19,23 @@ const UserList = () => {
   const [searchText, setSearchText] = useState("");
   const [initialData, setInitialData] = useState([]);
   const [displayedData, setDisplayedData] = useState(initialData.slice(0, 10));
-
+  const [isDeleteModalVisible, setDeleteModalVisible] = useState(false);
+  const [userToDelete, setUserToDelete] = useState(null);
+  
   const handleStatusChange = (e, key) => {
     const updatedDisplayedData = displayedData.map((item) =>
       item.key === key ? { ...item, status: e.target.value } : item
     );
     setDisplayedData(updatedDisplayedData);
+  };
+  const showDeleteModal = (id) => {
+    setUserToDelete(id);
+    setDeleteModalVisible(true);
+  };
+  
+  const hideDeleteModal = () => {
+    setUserToDelete(null);
+    setDeleteModalVisible(false);
   };
 
   const start = () => {
@@ -47,27 +58,60 @@ const UserList = () => {
 
   const hasSelected = selectedRowKeys.length > 0;
 
-  const handleDeleteUser = async (id, e) => {
+  // const handleDeleteUser = async (id, e) => {
+  //   e.stopPropagation();
+  
+  //   try {
+  //     const userRef = doc(firestore, "users", id);
+  //     console.log("Deleting user with ID:", id);
+  
+  //     const userSnapshot = await getDoc(userRef);
+  //     if (userSnapshot.exists()) {
+  //       await updateDoc(userRef, {
+  //         isDeleted: true,
+  //       });
+  //       console.log("User successfully deleted.");
+  //       fetchDataFromFirestore();
+       
+  //     } else {
+  //       console.log("User not found with ID:", id);
+  //     }
+  //   } catch (error) {
+  //     console.error("Error updating isDeleted:", error);
+  //   }
+  // };
+
+  const handleDeleteUser = (id, e) => {
     e.stopPropagation();
+    showDeleteModal(id);
+  };
   
+  const handleDeleteConfirmed = async () => {
     try {
-      const userRef = doc(firestore, "users", id);
-      console.log("Deleting user with ID:", id);
-  
+      const userRef = doc(firestore, "users", userToDelete);
       const userSnapshot = await getDoc(userRef);
+  
       if (userSnapshot.exists()) {
         await updateDoc(userRef, {
           isDeleted: true,
         });
+  
         console.log("User successfully deleted.");
         fetchDataFromFirestore();
       } else {
-        console.log("User not found with ID:", id);
+        console.log("User not found with ID:", userToDelete);
       }
+  
+      hideDeleteModal();
     } catch (error) {
       console.error("Error updating isDeleted:", error);
     }
   };
+  
+  const handleDeleteCancelled = () => {
+    hideDeleteModal();
+  };
+
 
   const handleBlockUser = async (id, isBlocked, e) => {
     e.stopPropagation();
@@ -160,6 +204,7 @@ const UserList = () => {
       </Space>
     ),
   },
+  
     {
       dataIndex: "block",
       align: "center",
@@ -227,7 +272,7 @@ const UserList = () => {
     }
   };
 
-
+  const shouldRenderViewAllButton = displayedData.length > 10;
 
   // const handleProfile = async () => {
   //   firestore()
@@ -269,6 +314,7 @@ const UserList = () => {
 
 
   return (
+    
     <div   style={{
       alignItems: "center",
       overflow: "auto",
@@ -277,6 +323,16 @@ const UserList = () => {
       width: "97.5%",     
     }}>
       <Layout />
+      <Modal
+  title="Confirm Deletion"
+  open={isDeleteModalVisible}
+  onOk={handleDeleteConfirmed}
+  onCancel={handleDeleteCancelled}
+  okText="Yes"
+  cancelText="No"
+>
+  Are you sure you want to delete this user?
+</Modal>
       <div style={{ marginTop: "-60px",alignItems: 'center', }}>
         <Input
         className="placeholder_search"
@@ -311,7 +367,7 @@ const UserList = () => {
          
       </div>
   <div style={{ marginBottom: 16 }}>
-        <Button 
+        {/* <Button 
           style={{
             width: "173px",
             height: "43px",
@@ -331,8 +387,8 @@ const UserList = () => {
           }}
         >
           + Add new User
-        </Button>
-        <Button
+        </Button> */}
+        {/* <Button
           onClick={loadAllData}
           style={{
             color: "rgba(0, 0, 0, 1)",
@@ -345,7 +401,23 @@ const UserList = () => {
           }}
         >
           View All
-        </Button>
+        </Button> */}
+        {shouldRenderViewAllButton && (
+          <Button
+            onClick={loadAllData}
+            style={{
+              color: "rgba(0, 0, 0, 1)",
+              border: "none",
+              marginLeft: "93.5%",
+              Weight: "500",
+              fontSize: "12px",
+              fontFamily: "Inter, sans-serif",
+              fontWeight: "bold",
+            }}
+          >
+            View All
+          </Button>
+        )}
         {hasSelected && (
           <Button
             onClick={handleDeleteAll}

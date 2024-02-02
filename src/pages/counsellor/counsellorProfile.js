@@ -45,8 +45,6 @@ const UpdateCounsellor = ({}) => {
   const [selectedImage, setSelectedImage] = useState(null);
   const fileInputRef = useRef(null);
 
-
-  console.log(initialData,"initialDatainitialData")
   useEffect(() => {
     if (selectedUser) {
       updateCounsellorForm.setFieldsValue(selectedUser);
@@ -86,7 +84,7 @@ const UpdateCounsellor = ({}) => {
         .map((doc) => ({ id: doc.id, ...doc.data() }))
         .filter((counsellor) => !counsellor.isDeleted);
       setInitialData(firebaseData);
-     
+     console.log(firebaseData,"new data profile")
     } catch (error) {
       console.error("Error fetching data from Firebase:", error);
     }

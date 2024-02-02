@@ -1,11 +1,11 @@
 import React, { useState, useEffect, useContext } from "react";
 import Layout from "../layout/layout.js";
-import { Box, Typography, Paper, Button, IconButton} from "@mui/material";
+import { Box, Typography, Paper, Button, IconButton } from "@mui/material";
 import { firestore, storage } from "../config/firebase";
 import { useNavigate, useLocation } from "react-router-dom";
-import { Delete,Edit } from "@mui/icons-material";
+import { Delete, Edit } from "@mui/icons-material";
 import PostModal from "../pages/admin/postEditModal.js";
-import Linkify from 'react-linkify'; 
+import Linkify from "react-linkify";
 import { Link } from "react-router-dom";
 
 import {
@@ -18,7 +18,6 @@ import {
   orderBy,
   query,
 } from "firebase/firestore";
-
 
 const Dashboard = () => {
   const [posts, setPosts] = useState([]);
@@ -40,19 +39,19 @@ const Dashboard = () => {
           collection(firestore, "posts"),
           orderBy("timestamp", "desc")
         );
-  
+
         const querySnapshot = await getDocs(postsQuery);
         const data = querySnapshot.docs.map((doc) => ({
           id: doc.id,
           ...doc.data(),
         }));
-  
+
         setPosts(data);
       } catch (error) {
         console.error("Error fetching data from Firebase:", error);
       }
     };
-  
+
     fetchPosts();
   }, []);
 
@@ -64,8 +63,6 @@ const Dashboard = () => {
       console.error("Error deleting post:", error);
     }
   };
-
-
 
   return (
     <div
@@ -101,8 +98,32 @@ const Dashboard = () => {
               margin: "20px",
               height: "300px",
               position: "relative",
+              borderRadius: "15px",
+              boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
+              overflow: "auto", 
             }}
           >
+              <style>
+    {`
+      ::-webkit-scrollbar {
+        width: 7px;
+      }
+
+      ::-webkit-scrollbar-thumb {
+        background-color: #888;
+        border-radius: 6px;
+      }
+
+      ::-webkit-scrollbar-thumb:hover {
+        background-color: #555;
+      }
+
+      ::-webkit-scrollbar-track {
+        background-color: #ddd;
+        border-radius: 8px;
+      }
+    `}
+  </style>
             <Typography
               variant="subtitle2"
               style={{
@@ -114,20 +135,22 @@ const Dashboard = () => {
             >
               {new Date(post.timestamp?.seconds * 1000).toLocaleString()}
             </Typography>
-             <IconButton  style={{
+            <IconButton
+              style={{
                 position: "absolute",
                 top: "10px",
                 left: "500px",
                 color: "black",
               }}
-              onClick={() => handleEditClick(post)}>
-            <Edit />
-          </IconButton>
-          <PostModal
-        isOpen={isModalOpen}
-        onClose={() => setModalOpen(false)}
-        selectedPost={selectedPost}
-      />
+              onClick={() => handleEditClick(post)}
+            >
+              <Edit />
+            </IconButton>
+            <PostModal
+              isOpen={isModalOpen}
+              onClose={() => setModalOpen(false)}
+              selectedPost={selectedPost}
+            />
             <IconButton
               style={{
                 position: "absolute",
@@ -141,7 +164,14 @@ const Dashboard = () => {
               <Delete />
             </IconButton>
             <Typography
-              style={{ marginBottom: "20px", marginTop: "10px" }}
+              style={{
+                marginBottom: "20px",
+                marginTop: "10px",
+                // overflow: "hidden",
+                // textOverflow: "ellipsis",
+                maxHeight: "3em",
+                // whiteSpace: "nowrap",
+              }}
               variant="h5"
             >
               {post.title}
@@ -150,20 +180,29 @@ const Dashboard = () => {
             <Linkify>{post.content}</Linkify>
             </Typography> */}
 
-            <Typography variant="body1">
-              <Linkify componentDecorator={(decoratedHref, decoratedText, key) => (
-                <Link to={decoratedHref} target="_blank" key={key}>
-                  {decoratedText}
-                </Link>
-              )}>
+            <Typography
+              variant="body1"
+              style={{
+                // overflow: "hidden",
+                // textOverflow: "ellipsis",
+                maxHeight: "4em",
+                // whiteSpace: "nowrap",
+              }}
+            >
+              <Linkify
+                componentDecorator={(decoratedHref, decoratedText, key) => (
+                  <Link to={decoratedHref} target="_blank" key={key}>
+                    {decoratedText}
+                  </Link>
+                )}
+              >
                 {post.content}
               </Linkify>
             </Typography>
 
-
-            {post.postImage && (
+            {post.image && (
               <img
-                src={post.postImage}
+                src={post.image}
                 alt="Post Image"
                 style={{ maxWidth: "100%", marginTop: "10px" }}
               />

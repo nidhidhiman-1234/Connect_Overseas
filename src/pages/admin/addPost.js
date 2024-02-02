@@ -19,43 +19,125 @@ const AddPost = ({}) => {
   const navigate = useNavigate();
   const [inputValue, setInputValue] = useState("");
   const [inputValue1, setInputValue1] = useState("");
+  const [selectedImage, setSelectedImage] = useState(null);
+  // const handleAddPost = async () => {
+  //   try {
+  //     const values = await form.validateFields();
 
+  //     // if (values.title === undefined || values.content === undefined) {
+  //     //   throw new Error("Title and Content are required fields");
+  //     // }
+
+  //     const newPost = {
+  //       title: values.title,
+  //       content: values.content,
+  //       timestamp: serverTimestamp(),
+  //     };
+
+    
+  //     if (values.image) {
+  //       const uniqueFilename = `${Date.now()}-${uuidv4()}`;
+  //       const storageRef = ref(storage, `postImages/${uniqueFilename}`);
+
+  //       const contentType = values.image.type;
+  //       const metadata = { contentType };
+
+  //       await uploadBytes(storageRef, values.image, metadata);
+
+  //       const downloadURL = await getDownloadURL(storageRef);
+  //       console.log("Download URL:", downloadURL);
+
+  //       newPost.image = downloadURL;
+  //       setPreviewImage(downloadURL);
+  //     }
+
+  //     await addDoc(collection(firestore, "posts"), newPost);
+  //     navigate("/dashboard");
+  //     form.resetFields();
+  //     message.success("Post added successfully!");
+  //     console.log("inputValue1 after:", inputValue1);
+  //   } catch (error) {
+  //     console.error("Error adding new post:", error);
+  //     message.error(
+  //       "Failed to add post. Please check the form fields and try again."
+  //     );
+  //   }
+  // };
+
+  // const handleAddPost = async (e) => {
+  //   try {
+  //     const values = await form.validateFields();
+      
+  //     const newPost = {
+  //       title: values.title,
+  //       content: values.content,
+  //       timestamp: serverTimestamp(),
+  //     };
+  
+  //     const selectedFile = values.image[0];
+  //     console.log("Selected File:", selectedFile);
+  
+  //     if (selectedFile) {
+  //       const uniqueFilename = `${Date.now()}-${uuidv4()}`;
+  //       const storageRef = ref(storage, `postImages/${uniqueFilename}`);
+  
+  //       await uploadBytes(storageRef, selectedFile);
+  
+  //       const downloadURL = await getDownloadURL(storageRef);
+  //       console.log("Download URL:", downloadURL);
+  
+  //       newPost.image = downloadURL;
+  //     }
+  
+  //     await addDoc(collection(firestore, "posts"), newPost);
+      
+  //     form.resetFields();
+  //     message.success("Post added successfully!");
+      
+  //     navigate("/dashboard");
+  //   } catch (error) {
+  //     console.error("Error adding new post:", error);
+  //     message.error(
+  //       "Failed to add post. Please check the form fields and try again."
+  //     );
+  //   }
+  // };
+  
   const handleAddPost = async () => {
     try {
       const values = await form.validateFields();
-
-      // if (values.title === undefined || values.content === undefined) {
-      //   throw new Error("Title and Content are required fields");
-      // }
-
       const newPost = {
-        title: values.title,
-        content: values.content,
         timestamp: serverTimestamp(),
       };
-
-    
-      if (values.image) {
+  
+      if (values.title) {
+        newPost.title = values.title;
+      }
+  
+      if (values.content) {
+        newPost.content = values.content;
+      }
+  
+      const selectedFile = values.image ? values.image[0] : null;
+  console.log(values.image ,"values.image values.image ")
+      if (selectedFile) {
         const uniqueFilename = `${Date.now()}-${uuidv4()}`;
-        const storageRef = ref(storage, `avatars/${uniqueFilename}`);
-
-        const contentType = values.image.type;
-        const metadata = { contentType };
-
-        await uploadBytes(storageRef, values.image, metadata);
-
+        const storageRef = ref(storage, `postImages/${uniqueFilename}`);
+  console.log(storageRef,"storageRefstorageRef")
+        await uploadBytes(storageRef, selectedFile);
+  
         const downloadURL = await getDownloadURL(storageRef);
         console.log("Download URL:", downloadURL);
-
-        newPost.postImage = downloadURL;
-        setPreviewImage(downloadURL);
+  
+        newPost.image = downloadURL;
       }
-
+  
       await addDoc(collection(firestore, "posts"), newPost);
-      navigate("/dashboard");
+  
       form.resetFields();
       message.success("Post added successfully!");
-      console.log("inputValue1 after:", inputValue1);
+  
+      navigate("/dashboard");
     } catch (error) {
       console.error("Error adding new post:", error);
       message.error(
@@ -63,8 +145,10 @@ const AddPost = ({}) => {
       );
     }
   };
-
   
+  
+  
+
   return (
     <div
       style={{
@@ -107,18 +191,20 @@ const AddPost = ({}) => {
     <Input.TextArea style={{ width: "100%", height: 200 }} /> 
 </Form.Item>
         
-        <Form.Item label="Image" name="image">
-          <Upload
-            // customRequest={customRequest}
-            accept="image/*"
-            showUploadList={false}
-            beforeUpload={() => false}
-          >
-            <Button style={{ marginBottom: "20px" }} icon={<UploadOutlined />}>
-              Upload Image
-            </Button>
-          </Upload>
-        </Form.Item>
+<Form.Item label="Image" name="image" getValueFromEvent={(e) => e.fileList}>
+  <Upload
+    accept="image/*"
+    showUploadList={false}
+    beforeUpload={() => false}
+    onPreview={(file) => setPreviewImage(file.url)}
+  >
+    <Button style={{ marginBottom: "20px" }} icon={<UploadOutlined />}>
+      Upload Image
+    </Button>
+  </Upload>
+</Form.Item>
+
+
         <Form.Item>
           <Button type="primary" htmlType="submit">
             Add Post
@@ -126,15 +212,11 @@ const AddPost = ({}) => {
         </Form.Item>
 
         {previewImage && (
-          <div>
-            <p>Preview:</p>
-            <img
-              src={previewImage}
-              alt="Preview"
-              style={{ maxWidth: "100%" }}
-            />
-          </div>
-        )}
+  <div>
+    <p>Preview:</p>
+    <img src={previewImage} alt="Preview" style={{ maxWidth: "100%" }} />
+  </div>
+)}
       </Form>
     </div>
   );

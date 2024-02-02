@@ -22,6 +22,7 @@ import {
   addDoc,
   updateDoc,
   doc,
+  getDoc
 } from "firebase/firestore";
 
 import {
@@ -63,6 +64,17 @@ const CounsellorList = () => {
     city: "",
     state: "",
   });
+  const [isDeleteModalVisible, setDeleteModalVisible] = useState(false);
+  const [userToDelete, setUserToDelete] = useState(null);
+  const showDeleteModal = (id) => {
+    setUserToDelete(id);
+    setDeleteModalVisible(true);
+  };
+  
+  const hideDeleteModal = () => {
+    setUserToDelete(null);
+    setDeleteModalVisible(false);
+  };
 
   const handleInputChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -95,18 +107,51 @@ const CounsellorList = () => {
 
   const hasSelected = selectedRowKeys.length > 0;
 
-  const handleDeleteCounsellor = async (id, e) => {
-    e.stopPropagation();
+  // const handleDeleteCounsellor = async (id, e) => {
+  //   e.stopPropagation();
 
+  //   try {
+  //     await updateDoc(doc(firestore, "councellors", id), {
+  //       isDeleted: true,
+  //     });
+  //     fetchDataFromFirestore();
+  //   } catch (error) {
+  //     console.error("Error updating isDeleted:", error);
+  //   }
+  // };
+
+  const handleDeleteCounsellor = (id, e) => {
+    e.stopPropagation();
+    showDeleteModal(id);
+  };
+  
+  const handleDeleteConfirmed = async () => {
     try {
-      await updateDoc(doc(firestore, "councellors", id), {
-        isDeleted: true,
-      });
-      fetchDataFromFirestore();
+      const userRef = doc(firestore, "councellors", userToDelete);
+      const userSnapshot = await getDoc(userRef);
+  
+      if (userSnapshot.exists()) {
+        await updateDoc(userRef, {
+          isDeleted: true,
+        });
+  
+        console.log("councellor successfully deleted.");
+        fetchDataFromFirestore();
+      } else {
+        console.log("councellors not found with ID:", userToDelete);
+      }
+  
+      hideDeleteModal();
     } catch (error) {
       console.error("Error updating isDeleted:", error);
     }
   };
+  
+
+  const handleDeleteCancelled = () => {
+    hideDeleteModal();
+  };
+
 
   const handleBlockCounsellor = async (id, isBlocked, e) => {
     e.stopPropagation();
@@ -259,20 +304,52 @@ const CounsellorList = () => {
     fetchDataFromFirestore();
   }, []);
 
+  // const fetchDataFromFirestore = async () => {
+  //   try {
+  //     const querySnapshot = await getDocs(collection(firestore, "councellors"));
+  //     const firebaseData = querySnapshot.docs
+  //       .map((doc) => ({ id: doc.id, ...doc.data() }))
+  //       .filter((counsellor) => !counsellor.isDeleted);
+  //       console.log(firebaseData, "counsellor data");
+  //     setInitialData(firebaseData);
+  //     setDisplayedData(firebaseData.slice(0, 10));
+  //     setTotalRecords(firebaseData.length);
+  //   } catch (error) {
+  //     console.error("Error fetching data from Firebase:", error);
+  //   }
+  // };
+  
   const fetchDataFromFirestore = async () => {
     try {
       const querySnapshot = await getDocs(collection(firestore, "councellors"));
       const firebaseData = querySnapshot.docs
         .map((doc) => ({ id: doc.id, ...doc.data() }))
         .filter((counsellor) => !counsellor.isDeleted);
-        // console.log(firebaseData, "counsellor data");
-      setInitialData(firebaseData);
-      setDisplayedData(firebaseData.slice(0, 10));
-      setTotalRecords(firebaseData.length);
+  
+      console.log(firebaseData, "counsellor data");
+  
+      const updatedFirebaseData = firebaseData.map((counsellor) => {
+        const timestampObject = counsellor.dateJoined;
+  
+        if (timestampObject && timestampObject.seconds && timestampObject.nanoseconds !== undefined) {
+          const dateJoined = new Date(timestampObject.seconds * 1000 + timestampObject.nanoseconds / 1e6);
+          return {
+            ...counsellor,
+            dateJoined: dateJoined.toISOString().split('T')[0],
+          };
+        } else {
+          return counsellor;
+        }
+      });
+  
+      setInitialData(updatedFirebaseData);
+      setDisplayedData(updatedFirebaseData.slice(0, 10));
+      setTotalRecords(updatedFirebaseData.length);
     } catch (error) {
       console.error("Error fetching data from Firebase:", error);
     }
   };
+  
 
   const handleSearch = (value) => {
     setSearchText(value);
@@ -299,36 +376,72 @@ const CounsellorList = () => {
     }
   };
 
-  const handleUpdateCounsellor = async () => {
-    try {
-      const values = await updateCounsellorForm.validateFields();
-      const updatedData = {
-        firstName: values.firstName,
-        lastName: values.lastName,
-        dateJoined: values.dateJoined.toDate(), 
-        email: values.email,
-        phone: values.phone,
-        city: values.city,
-        state: values.state,
-      };
+  // const handleUpdateCounsellor = async () => {
+  //   try {
+  //     const values = await updateCounsellorForm.validateFields();
+  //     const updatedData = {
+  //       firstName: values.firstName,
+  //       lastName: values.lastName,
+  //       dateJoined: values.dateJoined.toDate(), 
+  //       email: values.email,
+  //       phone: values.phone,
+  //       city: values.city,
+  //       state: values.state,
+  //     };
 
-      await updateDoc(
-        doc(firestore, "councellors", selectedUser.id),
-        updatedData
-      );
+  //     await updateDoc(
+  //       doc(firestore, "councellors", selectedUser.id),
+  //       updatedData
+  //     );
 
-      updateCounsellorForm.setFieldsValue(updatedData);
+  //     updateCounsellorForm.setFieldsValue(updatedData);
 
-      setEditModal(false);
-      fetchDataFromFirestore();
-    } catch (error) {
-      console.error("Error updating counsellor:", error);
-    }
-  };
+  //     setEditModal(false);
+  //     fetchDataFromFirestore();
+  //   } catch (error) {
+  //     console.error("Error updating counsellor:", error);
+  //   }
+  // };
 
   const rowClassName = (record, index) => {
     return "pointer-cursor";
   };
+
+  //   const handleAddCounsellor = async () => {
+  //     try {
+  //       const values = await addCounsellorForm.validateFields();
+    
+  //       const newData = {
+  //         firstName: values.firstName,
+  //         lastName: values.lastName,
+  //         dateJoined: values.dateJoined.toDate(), 
+  //         phone: values.phone,
+  //         city: values.city,
+  //         state: values.state,
+  //         email:values.email,
+  //         isDeleted: false,
+  //       };
+  
+  //     if (values.image) {
+  //       const uniqueFilename = `${Date.now()}-${uuidv4()}`;
+  //       const storageRef = ref(storage, `avatars/${uniqueFilename}`);
+  
+  //       await uploadBytes(storageRef, values.image);
+  //       const downloadURL = await getDownloadURL(storageRef);
+  
+  //       newData.image = downloadURL;
+  //     }
+  
+  //     const docRef = await addDoc(collection(firestore, "councellors"), newData);
+  
+  //     addCounsellorForm.resetFields();
+  //     setIsModalVisible(false);
+  
+  //     fetchDataFromFirestore();
+  //   } catch (error) {
+  //     console.error("Error adding new counsellor:", error);
+  //   }
+  // };
 
   const handleAddCounsellor = async () => {
     try {
@@ -337,23 +450,15 @@ const CounsellorList = () => {
       const newData = {
         firstName: values.firstName,
         lastName: values.lastName,
-        dateJoined: values.dateJoined.toDate(), 
+        dateJoined: values.dateJoined.toDate(),
         phone: values.phone,
         city: values.city,
         state: values.state,
+        email: values.email,
         isDeleted: false,
+        image:selectedImage
       };
-  
-      if (values.image) {
-        const uniqueFilename = `${Date.now()}-${uuidv4()}`;
-        const storageRef = ref(storage, `avatars/${uniqueFilename}`);
-  
-        await uploadBytes(storageRef, values.image);
-        const downloadURL = await getDownloadURL(storageRef);
-  
-        newData.image = downloadURL;
-      }
-  
+      console.log("File Input:", values.image);
       const docRef = await addDoc(collection(firestore, "councellors"), newData);
   
       addCounsellorForm.resetFields();
@@ -364,21 +469,10 @@ const CounsellorList = () => {
       console.error("Error adding new counsellor:", error);
     }
   };
-  
-  const handleEditIconClick = (e,record) => {
-    e.stopPropagation();
-    setSelectedUser(record);
-    fileInputRef.current.click();
-  };
-  // const handleEditIconClick = () => {
-  //   // Trigger file input when the Avatar is clicked
-  //   fileInputRef.current.click();
-  // };
-
-
+ 
   const handleFileInputChange = (e) => {
     const selectedFile = e.target.files[0];
-
+    console.log("Selected File:", selectedFile);
     if (selectedFile) {
       const uniqueFilename = `${Date.now()}-${uuidv4()}`;
       const storageRef = ref(storage, `avatars/${uniqueFilename}`);
@@ -397,7 +491,15 @@ const CounsellorList = () => {
     }
   };
   
- 
+  
+  const handleEditIconClick = (e,record) => {
+    e.stopPropagation();
+    setSelectedUser(record);
+    fileInputRef.current.click();
+  };
+
+
+  const shouldRenderViewAllButton = displayedData.length > 10;
 
   return (
     <div
@@ -410,6 +512,16 @@ const CounsellorList = () => {
       }}
     >
       <Layout />
+      <Modal
+  title="Confirm Deletion"
+  open={isDeleteModalVisible}
+  onOk={handleDeleteConfirmed}
+  onCancel={handleDeleteCancelled}
+  okText="Yes"
+  cancelText="No"
+>
+  Are you sure you want to delete this user?
+</Modal>
       <div style={{ marginTop: "-60px", alignItems: "center" }}>
         <Input
           className="placeholder_search"
@@ -464,7 +576,7 @@ const CounsellorList = () => {
         >
           + Add new Counsellor
         </Button>
-        <Button
+        {/* <Button
           onClick={loadAllData}
           style={{
             color: "rgba(0, 0, 0, 1)",
@@ -477,7 +589,23 @@ const CounsellorList = () => {
           }}
         >
           View All
-        </Button>
+        </Button> */}
+          {shouldRenderViewAllButton && (
+          <Button
+            onClick={loadAllData}
+            style={{
+              color: "rgba(0, 0, 0, 1)",
+              border: "none",
+              marginLeft: "93.5%",
+              Weight: "500",
+              fontSize: "12px",
+              fontFamily: "Inter, sans-serif",
+              fontWeight: "bold",
+            }}
+          >
+            View All
+          </Button>
+        )}
         {hasSelected && (
           <Button
             onClick={handleDeleteAll}
@@ -516,7 +644,7 @@ const CounsellorList = () => {
               type="file"
               ref={fileInputRef}
               style={{ display: 'none' }}
-              onChange={handleFileInputChange}
+               onChange={(e) => handleFileInputChange(e)}
               
             />
         
