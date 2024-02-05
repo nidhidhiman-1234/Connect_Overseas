@@ -29,7 +29,7 @@ const AddAdvertisement = ({}) => {
     
           message.success("Advertisement added successfully!");
     
-          navigate('/dashboard');
+          navigate('/advertisements');
         } catch (error) {
           console.error("Error adding advertisement: ", error.message);
           message.error("Failed to add advertisement. Please try again.");

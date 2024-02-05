@@ -188,6 +188,8 @@ export default function Layout(props: Props) {
     Counsellors: "/counsellor.svg",
     Users: "/user.svg",
     Universities: "/uni.svg",
+    Posts: "/uni.svg",
+    Advertisements: "/uni.svg",
     Notification: "/bell.svg",
     Settings: "/settings.svg",
   };
@@ -213,12 +215,16 @@ export default function Layout(props: Props) {
                   ? "/dashboard"
                   : text === "Users"
                   ? "/userlist"
+                  : text === "Posts"
+                  ? "/posts"
+                  : text === "Advertisements"
+                  ? "/advertisements"
                   : "/"
               }
               style={{
                 color: selectedItem === text ? " #18407c" : "white",
                 backgroundColor: selectedItem === text ? "white" : "",
-                marginTop: text === "Notification" ? "350px" : "8px",
+                marginTop: text === "Notification" ? "240px" : "8px",
                 borderRadius: "10px",
                 display: "flex",
                 marginLeft: "23px",

@@ -66,7 +66,7 @@ const AddPost = ({}) => {
       setFileList([]);
       message.success("Post added successfully!");
   
-      navigate("/dashboard");
+      navigate("/posts");
     } catch (error) {
       console.error("Error adding new post:", error);
       message.error(
