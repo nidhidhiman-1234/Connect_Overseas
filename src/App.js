@@ -1,15 +1,14 @@
-import logo from './logo.svg';
 import './App.css';
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Dashboard from "./componets/dashboard";
 import CounsellorList from './componets/counsellor';
 import Layout from './layout/layout';
-import { UserDeleteOutlined } from '@ant-design/icons';
 import UserList from './componets/users';
 import UpdateCounsellor from './pages/counsellor/counsellorProfile';
 import AdminProfile from './pages/admin/adminProfile';
 import AddPost from './pages/admin/addPost';
-import CustomInputWithEmoji from './utils/emojis'
+// import CustomInputWithEmoji from './utils/emojis'
+import AddAdvertisement from './pages/admin/addAdvertisement';
 
 function App() {
   return (
@@ -24,7 +23,9 @@ function App() {
           <Route path="/counsellor" element={<UpdateCounsellor />} />
           <Route path="/admin" element={<AdminProfile/>} />
           <Route path="/post" element={<AddPost/>} />
-          <Route path="/emo" element={<CustomInputWithEmoji />} />
+          {/* <Route path="/emo" element={<CustomInputWithEmoji />} /> */}
+          {/* <Route path="/advertisement" element={<Advertisement/>} /> */}
+          <Route path="/addadvertisement" element={<AddAdvertisement/>} />
         </Routes>
       </div>
     </BrowserRouter>

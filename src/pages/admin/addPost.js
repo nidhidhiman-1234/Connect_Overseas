@@ -20,121 +20,50 @@ const AddPost = ({}) => {
   const [inputValue, setInputValue] = useState("");
   const [inputValue1, setInputValue1] = useState("");
   const [selectedImage, setSelectedImage] = useState(null);
-  // const handleAddPost = async () => {
-  //   try {
-  //     const values = await form.validateFields();
+  const [title, setTitle] = useState("");
+  const [content, setContent] = useState("");
+  const [image, setImage] = useState(null);
+  const [fileList, setFileList] = useState([]);
+  const [images, setImages] = useState([]);
 
-  //     // if (values.title === undefined || values.content === undefined) {
-  //     //   throw new Error("Title and Content are required fields");
-  //     // }
-
-  //     const newPost = {
-  //       title: values.title,
-  //       content: values.content,
-  //       timestamp: serverTimestamp(),
-  //     };
-
-    
-  //     if (values.image) {
-  //       const uniqueFilename = `${Date.now()}-${uuidv4()}`;
-  //       const storageRef = ref(storage, `postImages/${uniqueFilename}`);
-
-  //       const contentType = values.image.type;
-  //       const metadata = { contentType };
-
-  //       await uploadBytes(storageRef, values.image, metadata);
-
-  //       const downloadURL = await getDownloadURL(storageRef);
-  //       console.log("Download URL:", downloadURL);
-
-  //       newPost.image = downloadURL;
-  //       setPreviewImage(downloadURL);
-  //     }
-
-  //     await addDoc(collection(firestore, "posts"), newPost);
-  //     navigate("/dashboard");
-  //     form.resetFields();
-  //     message.success("Post added successfully!");
-  //     console.log("inputValue1 after:", inputValue1);
-  //   } catch (error) {
-  //     console.error("Error adding new post:", error);
-  //     message.error(
-  //       "Failed to add post. Please check the form fields and try again."
-  //     );
-  //   }
-  // };
-
-  // const handleAddPost = async (e) => {
-  //   try {
-  //     const values = await form.validateFields();
-      
-  //     const newPost = {
-  //       title: values.title,
-  //       content: values.content,
-  //       timestamp: serverTimestamp(),
-  //     };
-  
-  //     const selectedFile = values.image[0];
-  //     console.log("Selected File:", selectedFile);
-  
-  //     if (selectedFile) {
-  //       const uniqueFilename = `${Date.now()}-${uuidv4()}`;
-  //       const storageRef = ref(storage, `postImages/${uniqueFilename}`);
-  
-  //       await uploadBytes(storageRef, selectedFile);
-  
-  //       const downloadURL = await getDownloadURL(storageRef);
-  //       console.log("Download URL:", downloadURL);
-  
-  //       newPost.image = downloadURL;
-  //     }
-  
-  //     await addDoc(collection(firestore, "posts"), newPost);
-      
-  //     form.resetFields();
-  //     message.success("Post added successfully!");
-      
-  //     navigate("/dashboard");
-  //   } catch (error) {
-  //     console.error("Error adding new post:", error);
-  //     message.error(
-  //       "Failed to add post. Please check the form fields and try again."
-  //     );
-  //   }
-  // };
-  
+ 
   const handleAddPost = async () => {
     try {
-      const values = await form.validateFields();
+      console.log("Current image state:", images);
+  
       const newPost = {
         timestamp: serverTimestamp(),
       };
   
-      if (values.title) {
-        newPost.title = values.title;
+      if (title) {
+        newPost.title = title;
       }
   
-      if (values.content) {
-        newPost.content = values.content;
+      if (content) {
+        newPost.content = content;
       }
   
-      const selectedFile = values.image ? values.image[0] : null;
-  console.log(values.image ,"values.image values.image ")
-      if (selectedFile) {
-        const uniqueFilename = `${Date.now()}-${uuidv4()}`;
-        const storageRef = ref(storage, `postImages/${uniqueFilename}`);
-  console.log(storageRef,"storageRefstorageRef")
-        await uploadBytes(storageRef, selectedFile);
+      if (images.length > 0) {
+        const imageUrls = await Promise.all(
+          images.map(async (image) => {
+            const uniqueFilename = `${Date.now()}-${uuidv4()}`;
+            const storageRef = ref(storage, `postImages/${uniqueFilename}`);
+            await uploadBytes(storageRef, image);
+            return getDownloadURL(storageRef);
+          })
+        );
   
-        const downloadURL = await getDownloadURL(storageRef);
-        console.log("Download URL:", downloadURL);
-  
-        newPost.image = downloadURL;
+        newPost.images = imageUrls;
       }
   
       await addDoc(collection(firestore, "posts"), newPost);
   
       form.resetFields();
+      setTitle("");
+      setContent("");
+      setImages(null);
+      setPreviewImage(null);
+      setFileList([]);
       message.success("Post added successfully!");
   
       navigate("/dashboard");
@@ -147,8 +76,6 @@ const AddPost = ({}) => {
   };
   
   
-  
-
   return (
     <div
       style={{
@@ -168,35 +95,42 @@ const AddPost = ({}) => {
         clabelCol={{ span: 6 }}
         wrapperCol={{ span: 16 }}
       >
-        <Form.Item
-          label="Title"
-          name="title"
-          // rules={[{ required: true, message: "Please enter the title" }]}
-        >
-            {/* <CustomInputWithEmoji inputValue={inputValue} setInputValue={setInputValue} /> */}
-         
-            <Input style={{ width: "50%", height: 50 }} /> 
+         <Form.Item label="Title" name="title">
+          <Input
+            style={{ width: "50%", height: 50 }}
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+          />
         </Form.Item>
-        <Form.Item
-  label="Content"
-  name="content"
-  // rules={[{ required: true, message: "Please enter the content" }]}
->
-  {/* <div style={{ display: "flex" }}>
-    <CustomInputWithEmoji
-      inputValue={inputValue1}
-      setInputValue={setInputValue1}
-    />
-  </div> */}
-    <Input.TextArea style={{ width: "100%", height: 200 }} /> 
-</Form.Item>
-        
-<Form.Item label="Image" name="image" getValueFromEvent={(e) => e.fileList}>
+        <Form.Item label="Content" name="content">
+          <Input.TextArea
+            style={{ width: "100%", height: 200 }}
+            value={content}
+            onChange={(e) => setContent(e.target.value)}
+          />
+        </Form.Item>
+
+<Form.Item label="Image" name="image" getValueFromEvent={() => []}>
   <Upload
-    accept="image/*"
-    showUploadList={false}
-    beforeUpload={() => false}
+    action="https://run.mocky.io/v3/435e224c-44fb-4773-9faf-380c5e6a2188"
+    listType="picture"
+    defaultFileList={[...fileList]}
+    className="upload-list-inline"
     onPreview={(file) => setPreviewImage(file.url)}
+    onChange={(info) => {
+      const newFileList = [...info.fileList];
+
+      if (newFileList.length > 3) {
+        newFileList.splice(0, newFileList.length - 3);
+      }
+
+      const newImages = newFileList
+        .filter((file) => file.status === "done")
+        .map((file) => file.originFileObj);
+
+      setFileList(newFileList);
+      setImages(newImages);
+    }}
   >
     <Button style={{ marginBottom: "20px" }} icon={<UploadOutlined />}>
       Upload Image
@@ -206,20 +140,21 @@ const AddPost = ({}) => {
 
 
         <Form.Item>
-          <Button type="primary" htmlType="submit">
+
+        <Button
+            type="primary"
+            htmlType="submit"
+            disabled={!(title || content || images.length>0)}
+          >
             Add Post
           </Button>
+          
         </Form.Item>
 
-        {previewImage && (
-  <div>
-    <p>Preview:</p>
-    <img src={previewImage} alt="Preview" style={{ maxWidth: "100%" }} />
-  </div>
-)}
       </Form>
     </div>
   );
 };
 
 export default AddPost;
+

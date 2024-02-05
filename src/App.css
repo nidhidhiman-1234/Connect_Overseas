@@ -105,3 +105,16 @@ button.MuiButtonBase-root.MuiIconButton-root.MuiIconButton-colorInherit.MuiIconB
 .pointer-cursor {
   cursor: pointer;
 }
+
+ul.MuiList-root.MuiList-padding {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  position: relative;
+  padding-top: 38px;
+  padding-bottom: 8px;
+}
+
+.star {
+  cursor: pointer;
+}

@@ -176,7 +176,7 @@ export default function Layout(props: Props) {
   const myStyles = {
     width: "124px",
     height: "33.29px",
-    top: "15.64px",
+    top: "30px",
     left: "52px",
     position: "absolute",
     color: "white",
@@ -218,7 +218,7 @@ export default function Layout(props: Props) {
               style={{
                 color: selectedItem === text ? " #18407c" : "white",
                 backgroundColor: selectedItem === text ? "white" : "",
-                marginTop: text === "Notification" ? "435px" : "8px",
+                marginTop: text === "Notification" ? "350px" : "8px",
                 borderRadius: "10px",
                 display: "flex",
                 marginLeft: "23px",
