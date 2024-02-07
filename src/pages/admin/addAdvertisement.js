@@ -19,75 +19,32 @@ const AddAdvertisement = () => {
   const [link, setLink] = useState("");
   const [fileList, setFileList] = useState([]);
 
-  // const handleFormSubmit = async () => {
-  //   try {
-
-  //     console.log("Current image state:", logo);
-  //     const newPost = {
-  //       timestamp: serverTimestamp(),
-  //       title,
-  //       rating,
-  //       description,
-  //       link,
-  //     };
-
-  //     if (Array.isArray(logo)) {
-  //       const logoUrls = await Promise.all(
-  //         logo.map(async (image) => {
-  //           const uniqueFilename = `${Date.now()}-${uuidv4()}`;
-  //           const storageRef = ref(storage, `AdvtImages/${uniqueFilename}`);
-  //           await uploadBytes(storageRef, image);
-  //           return getDownloadURL(storageRef);
-  //         })
-  //       );
-
-  //       newPost.logo = logoUrls;
-  //     } 
-  //     await addDoc(collection(firestore, "advertisements"), newPost);
-
-  //     form.resetFields();
-  //     setTitle("");
-  //     setDescription("");
-  //     setRating(0);
-  //     setLogo(null);
-  //     setFileList([]);
-  //     message.success("Advertisement added successfully!");
-
-  //     navigate("/advertisements");
-  //   } catch (error) {
-  //     console.error("Error adding new advertisement:", error);
-  //     message.error(
-  //       "Failed to add advertisement. Please check the form fields and try again."
-  //     );
-  //   }
-  // };
-
-
   const handleFormSubmit = async () => {
     try {
       console.log("Current image state:", logo);
-      const newPost = {
+      const newAdvertisement = {
         timestamp: serverTimestamp(),
         title,
         rating,
         description,
         link,
+        active: true,
       };
-  
+
       if (Array.isArray(logo)) {
-        const logoUrl = await uploadLogo(logo[0]); 
-        newPost.logo = logoUrl;
+        const logoUrl = await uploadLogo(logo[0]);
+        newAdvertisement.logo = logoUrl;
       }
-  
-      await addDoc(collection(firestore, "advertisements"), newPost);
-  
+
+      await addDoc(collection(firestore, "advertisements"), newAdvertisement);
+
       form.resetFields();
       setTitle("");
       setDescription("");
       setRating(0);
       setLogo(null);
       message.success("Advertisement added successfully!");
-  
+
       navigate("/advertisements");
     } catch (error) {
       console.error("Error adding new advertisement:", error);
@@ -96,13 +53,14 @@ const AddAdvertisement = () => {
       );
     }
   };
-  
+
   const uploadLogo = async (file) => {
     const uniqueFilename = `${Date.now()}-${uuidv4()}`;
     const storageRef = ref(storage, `AdvtImages/${uniqueFilename}`);
     await uploadBytes(storageRef, file);
     return getDownloadURL(storageRef);
   };
+
 
 
   return (

@@ -29,8 +29,25 @@ const Dashboard = () => {
   const [isModalOpen, setModalOpen] = useState(false);
 
   const [selectedImage, setSelectedImage] = useState(null);
+  const [rating, setRating] = useState(5);
+  const [select, setSelect] = useState(false);
+  const maxContentLength = 140;
+  const [advertisements, setAdvertisements] = useState([]);
 
+  const handleCardClick = (advertisementId) => {
+    console.log(`Card clicked for advertisement with ID: ${advertisementId}`);
+  };
+  const handleStarClick = (value) => {
+    setRating(value);
+    setSelect(true)
+  };
 
+  const truncateContent = (content) => {
+    if (content?.length > maxContentLength) {
+      return content.substring(0, maxContentLength) + "...";
+    }
+    return content;
+  };
 
   const handleImageClick = (imageUrl) => {
     setSelectedImage(imageUrl);
@@ -45,6 +62,16 @@ const Dashboard = () => {
     setModalOpen(true);
   };
 
+  console.log("===============", rating);
+
+  const renderStars = () => (
+    <Rate
+      // allowHalf
+      value={rating}
+      onChange={(value) => handleStarClick(value)}
+      style={{ color: select ? '#FFD700' : 'white', cursor: 'pointer' }}
+    />
+  )
 
   useEffect(() => {
     const fetchPosts = async () => {
@@ -79,8 +106,31 @@ const Dashboard = () => {
   };
 
  
-
+  useEffect(() => {
+    const fetchAdvertisements = async () => {
+      try {
+        const advertisementsCollection = await getDocs(collection(firestore, "advertisements"));
+        const snapshot = advertisementsCollection.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
   
+        console.log("Fetched Advertisements:", snapshot);
+        setAdvertisements(snapshot);
+      } catch (error) {
+        console.error("Error fetching advertisements:", error);
+      }
+    };
+  
+    fetchAdvertisements();
+  }, []);
+
+  const handleContactNowClick = (link) => {
+    if (link) {
+      window.open(link, "_blank");
+    } else {
+      console.log("No link available for this advertisement.");
+    }
+  };
+
+  const activeAdvertisements = advertisements.filter(advertisement => advertisement.active);
 
   return (
     <div
@@ -93,18 +143,79 @@ const Dashboard = () => {
       }}
     >
       <Layout />
-
-      <Box className="dashboard">
-        <Button
-          variant="contained"
-          color="primary"
-          style={{ marginBottom: "20px", marginTop: "25px" }}
-          onClick={() => {
-            navigate("/post");
+    
+      <Space direction="vertical" size={16}>
+     
+      
+        <h2>  Advertisements</h2>
+        {activeAdvertisements.map((advertisement) => (
+        <Card
+        key={advertisement.id}
+          style={{
+            width: "250%",
+            maxWidth: 550,
+            maxHeight: 400,
+            borderRadius: 20,
+            boxShadow: "0 4px 12px rgba(0, 0, 0, 0.2)",
+            position: "relative",
+            border: "2px solid #e8e8e8",
+            backgroundColor: "#122534",
+            color: "white",
           }}
         >
-          Add New Post
-        </Button>
+     
+            <div style={{ position: "relative" }}>
+            
+          <div style={{ padding: "10px", overflow: "hidden" }}>
+            
+          <div style={{ position: "absolute", top: 60, left: 30, width: "60%" }}>
+      <img src={advertisement.logo} alt="Logo" style={{ width: "50%" }} />
+    </div>
+            <div style={{ marginLeft: "45%", padding: "10px", color: "white" }}>
+            <h2>{advertisement.title}</h2>
+
+            <div
+        className="star"
+        style={{
+          display: "flex",
+          alignItems: "center",
+          marginBottom: "10px",
+        }}
+      >
+        <Rate
+          value={advertisement.rating}
+          style={{ color: '#FFD700' }}
+          disabled
+        />
+      </div>
+
+              <p style={{ wordWrap: "break-word", wordBreak: "break-all" }}>
+                 {truncateContent(advertisement.description)}
+              </p>
+
+              <Button
+  style={{
+    backgroundColor: "#23488B",
+    color: "white",
+    height: "40px",
+    width: "216px",
+  }}
+  type="primary"
+  onClick={() => handleContactNowClick(advertisement.link)}
+>
+  Contact Now
+</Button>
+
+            </div>
+            </div>
+          </div>
+        </Card>
+          ))}
+      </Space>
+
+      <Box className="dashboard">
+
+      <h2>posts</h2>
         {posts.map((post) => (
           <Paper
             key={post.id}
@@ -153,34 +264,7 @@ const Dashboard = () => {
             >
               {new Date(post.timestamp?.seconds * 1000).toLocaleString()}
             </Typography>
-            <IconButton
-              style={{
-                position: "absolute",
-                top: "10px",
-                left: "500px",
-                color: "black",
-              }}
-              onClick={() => handleEditClick(post)}
-            >
-              <Edit />
-            </IconButton>
-            <PostModal
-              isOpen={isModalOpen}
-              onClose={() => setModalOpen(false)}
-              selectedPost={selectedPost}
-            />
-            <IconButton
-              style={{
-                position: "absolute",
-                top: "10px",
-                right: "20px",
-                color: "black",
-              }}
-              color="secondary"
-              onClick={() => handleDeletePost(post.id)}
-            >
-              <Delete />
-            </IconButton>
+          
             <Typography
               style={{
                 marginBottom: "20px",

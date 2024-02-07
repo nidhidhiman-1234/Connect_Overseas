@@ -4,15 +4,16 @@ import { Box, Typography, Paper, Button, IconButton } from "@mui/material";
 import { firestore, storage } from "../../config/firebase.js";
 import { useNavigate, useLocation } from "react-router-dom";
 import AdvertisementModal from "./advertisementEditModal.js";
-
-import { Card, Space, Rate } from "antd";
+import { CheckOutlined, CloseOutlined } from '@ant-design/icons';
+import { Card, Space, Rate,Switch } from "antd";
 import { Delete, Edit } from "@mui/icons-material";
 
 import {
   collection,
   getDocs,
   deleteDoc,
-  doc
+  doc,
+  updateDoc,
  
 } from "firebase/firestore";
 
@@ -23,6 +24,7 @@ const Advertisement = () => {
   const [advertisements, setAdvertisements] = useState([]);
   const [selectedAdvertisement, setSelectedAdvertisement] = useState(null);
   const [isModalOpen, setModalOpen] = useState(false);
+  const [switchState, setSwitchState] = useState(true);
 
   const truncateContent = (content) => {
     if (content?.length > maxContentLength) {
@@ -68,10 +70,29 @@ const Advertisement = () => {
     }
   };
   
-
   const handleEditClick = (advertisement) => {
     setSelectedAdvertisement(advertisement);
     setModalOpen(true);
+  };
+
+  const handleChange = async (checked, advertisementId) => {
+    try {
+      const advertisementRef = doc(firestore, "advertisements", advertisementId);
+      await updateDoc(advertisementRef, {
+        active: checked,
+      });
+      console.log("Advertisement updated successfully");
+      setAdvertisements(prevAdvertisements =>
+        prevAdvertisements.map(advertisement => {
+          if (advertisement.id === advertisementId) {
+            return { ...advertisement, active: checked };
+          }
+          return advertisement;
+        })
+      );
+    } catch (error) {
+      console.error("Error updating advertisement:", error);
+    }
   };
 
 
@@ -113,13 +134,30 @@ const Advertisement = () => {
             color: "white",
           }}
         >
+     
             <div style={{ position: "relative" }}>
+            
+            <Space>
+            <Switch
+             checkedChildren={<CheckOutlined />}
+             unCheckedChildren={<CloseOutlined />}
+             defaultChecked
+                checked={advertisement.active}
+                onChange={(checked) =>
+                  handleChange(checked, advertisement.id)
+                }
+              />
+              {advertisement.active ? 'Active' : 'Inactive'}
+      
+    </Space>
+   
+   
             <IconButton
               style={{
                 position: "absolute",
                 top: "-10px",
                 left: "400px",
-                color: "#FF0000",
+                color: "#1976D2",
               }}
               onClick={() => handleEditClick(advertisement)}
             >
@@ -136,7 +174,7 @@ const Advertisement = () => {
                   position: "absolute",
                   top: "-10px",
                   right: "10px",
-                  color: "#FF0000",
+                  color: "#1976D2",
                 }}
                 onClick={() => handleDeleteAdvertisement(advertisement.id)}
               >
