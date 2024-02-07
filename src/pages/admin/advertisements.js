@@ -3,13 +3,16 @@ import Layout from "../../layout/layout.js";
 import { Box, Typography, Paper, Button, IconButton } from "@mui/material";
 import { firestore, storage } from "../../config/firebase.js";
 import { useNavigate, useLocation } from "react-router-dom";
+import AdvertisementModal from "./advertisementEditModal.js";
 
 import { Card, Space, Rate } from "antd";
-import { StarFilled } from "@ant-design/icons";
+import { Delete, Edit } from "@mui/icons-material";
 
 import {
   collection,
   getDocs,
+  deleteDoc,
+  doc
  
 } from "firebase/firestore";
 
@@ -18,6 +21,8 @@ const Advertisement = () => {
   const [select, setSelect] = useState(false);
   const maxContentLength = 140;
   const [advertisements, setAdvertisements] = useState([]);
+  const [selectedAdvertisement, setSelectedAdvertisement] = useState(null);
+  const [isModalOpen, setModalOpen] = useState(false);
 
   const truncateContent = (content) => {
     if (content?.length > maxContentLength) {
@@ -51,6 +56,23 @@ const Advertisement = () => {
     }
   };
   
+  const handleDeleteAdvertisement = async (advertisementId) => {
+    try {
+      await deleteDoc(doc(firestore, "advertisements", advertisementId));
+      setAdvertisements((prevAdvertisements) =>
+        prevAdvertisements.filter((ad) => ad.id !== advertisementId)
+      );
+      console.log("Advertisement deleted successfully");
+    } catch (error) {
+      console.error("Error deleting advertisement:", error);
+    }
+  };
+  
+
+  const handleEditClick = (advertisement) => {
+    setSelectedAdvertisement(advertisement);
+    setModalOpen(true);
+  };
 
 
   return (
@@ -91,6 +113,36 @@ const Advertisement = () => {
             color: "white",
           }}
         >
+            <div style={{ position: "relative" }}>
+            <IconButton
+              style={{
+                position: "absolute",
+                top: "-10px",
+                left: "400px",
+                color: "#FF0000",
+              }}
+              onClick={() => handleEditClick(advertisement)}
+            >
+              <Edit />
+            </IconButton>
+            <AdvertisementModal
+              isOpen={isModalOpen}
+              onClose={() => setModalOpen(false)}
+              selectedAdvertisement={selectedAdvertisement}
+            />
+
+<IconButton
+                style={{
+                  position: "absolute",
+                  top: "-10px",
+                  right: "10px",
+                  color: "#FF0000",
+                }}
+                onClick={() => handleDeleteAdvertisement(advertisement.id)}
+              >
+                <Delete/>
+              </IconButton>
+
           <div style={{ padding: "10px", overflow: "hidden" }}>
             
           <div style={{ position: "absolute", top: 60, left: 30, width: "60%" }}>
@@ -130,6 +182,8 @@ const Advertisement = () => {
 >
   Contact Now
 </Button>
+
+            </div>
             </div>
           </div>
         </Card>
