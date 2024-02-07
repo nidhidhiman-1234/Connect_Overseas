@@ -5,24 +5,16 @@ import { UploadOutlined,SmileOutlined  } from "@ant-design/icons";
 import { firestore, storage } from "../../config/firebase";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { useNavigate, useLocation } from "react-router-dom";
-import EmojiPicker from "react-emoji-picker";
-import emojify from "emoji-dictionary";
 import { collection, addDoc, serverTimestamp } from "firebase/firestore";
 import { v4 as uuidv4 } from "uuid";
-import CustomInputWithEmoji from "../../utils/emojis";
-import Linkify from 'react-linkify';
+
 
 const AddPost = ({}) => {
   const [form] = Form.useForm();
   const [previewImage, setPreviewImage] = useState(null);
-  const [selectedEmoji, setSelectedEmoji] = useState(null);
   const navigate = useNavigate();
-  const [inputValue, setInputValue] = useState("");
-  const [inputValue1, setInputValue1] = useState("");
-  const [selectedImage, setSelectedImage] = useState(null);
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
-  const [image, setImage] = useState(null);
   const [fileList, setFileList] = useState([]);
   const [images, setImages] = useState([]);
 

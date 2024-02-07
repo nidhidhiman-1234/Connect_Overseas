@@ -9,7 +9,7 @@ import AdminProfile from './pages/admin/adminProfile';
 import AddPost from './pages/admin/addPost';
 // import CustomInputWithEmoji from './utils/emojis'
 import AddAdvertisement from './pages/admin/addAdvertisement';
-import View from './pages/admin/display';
+import Advertisement from './pages/admin/advertisements';
 import Post from './pages/admin/posts';
 
 function App() {
@@ -26,7 +26,7 @@ function App() {
           <Route path="/admin" element={<AdminProfile/>} />
           <Route path="/post" element={<AddPost/>} />
           {/* <Route path="/emo" element={<CustomInputWithEmoji />} /> */}
-          <Route path="/advertisements" element={<View/>} />
+          <Route path="/advertisements" element={<Advertisement/>} />
           <Route path="/advertisement" element={<AddAdvertisement/>} />
           <Route path="/posts" element={<Post/>} />
         </Routes>

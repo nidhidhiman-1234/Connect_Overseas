@@ -21,8 +21,9 @@ import {
   getDocs,
   addDoc,
   updateDoc,
-  doc,
-  getDoc
+  getDoc,
+  setDoc,
+   doc
 } from "firebase/firestore";
 
 import {
@@ -407,30 +408,25 @@ const CounsellorList = () => {
     return "pointer-cursor";
   };
 
-  //   const handleAddCounsellor = async () => {
-  //     try {
-  //       const values = await addCounsellorForm.validateFields();
-    
-  //       const newData = {
-  //         firstName: values.firstName,
-  //         lastName: values.lastName,
-  //         dateJoined: values.dateJoined.toDate(), 
-  //         phone: values.phone,
-  //         city: values.city,
-  //         state: values.state,
-  //         email:values.email,
-  //         isDeleted: false,
-  //       };
+
+  // const handleAddCounsellor = async () => {
+  //   try {
+  //     const values = await addCounsellorForm.validateFields();
   
-  //     if (values.image) {
-  //       const uniqueFilename = `${Date.now()}-${uuidv4()}`;
-  //       const storageRef = ref(storage, `avatars/${uniqueFilename}`);
+  //     const newData = {
+  //      id: values.phone,
+  //       firstName: values.firstName,
+  //       lastName: values.lastName,
+  //       dateJoined: values.dateJoined.toDate(),
+  //       phone: values.phone,
+  //       city: values.city,
+  //       state: values.state,
+  //       email: values.email,
+  //       isDeleted: false,
+  //       image: selectedImage
+  //     };
   
-  //       await uploadBytes(storageRef, values.image);
-  //       const downloadURL = await getDownloadURL(storageRef);
-  
-  //       newData.image = downloadURL;
-  //     }
+  //     newData.id = values.phone;
   
   //     const docRef = await addDoc(collection(firestore, "councellors"), newData);
   
@@ -442,6 +438,7 @@ const CounsellorList = () => {
   //     console.error("Error adding new counsellor:", error);
   //   }
   // };
+  
 
   const handleAddCounsellor = async () => {
     try {
@@ -456,10 +453,11 @@ const CounsellorList = () => {
         state: values.state,
         email: values.email,
         isDeleted: false,
-        image:selectedImage
+        image: selectedImage
       };
-      console.log("File Input:", values.image);
-      const docRef = await addDoc(collection(firestore, "councellors"), newData);
+      const counsellorRef = doc(firestore, "councellors", values.phone);
+  
+      await setDoc(counsellorRef, newData);
   
       addCounsellorForm.resetFields();
       setIsModalVisible(false);
@@ -469,7 +467,8 @@ const CounsellorList = () => {
       console.error("Error adding new counsellor:", error);
     }
   };
- 
+  
+
   const handleFileInputChange = (e) => {
     const selectedFile = e.target.files[0];
     console.log("Selected File:", selectedFile);
@@ -521,6 +520,7 @@ const CounsellorList = () => {
   cancelText="No"
 >
   Are you sure you want to delete this user?
+  
 </Modal>
       <div style={{ marginTop: "-60px", alignItems: "center" }}>
         <Input
