@@ -1,75 +1,197 @@
-import React, { useState, useEffect, useContext } from "react";
+// import React, { useState, useEffect, useContext } from "react";
 
-import { Modal, Form, Input, Button } from "antd";
+// import { Modal, Form, Input, Button,Upload } from "antd";
+// import { firestore, storage } from "../../config/firebase";
+// import {
+//     collection,
+//     addDoc,
+//     updateDoc,
+//     doc,
+//     serverTimestamp,
+//   } from "firebase/firestore";
+//   import { UploadOutlined } from '@ant-design/icons';
+
+// const PostModal = ({ isOpen, onClose, selectedPost }) => {
+//   const [form] = Form.useForm();
+//   const [selectedImage, setSelectedImage] = useState(null);
+
+//   useEffect(() => {
+//     form.resetFields();
+//     if (selectedPost) {
+//       form.setFieldsValue({
+//         title: selectedPost.title,
+//         content: selectedPost.content,
+//       });
+//     }
+//   }, [selectedPost, form]);
+
+//     const handleSave = async () => {
+//     try {
+//       const values = await form.validateFields();
+//       const post = {
+//         title: values.title,
+//         content: values.content,
+//         timestamp: serverTimestamp(),
+//         images: selectedImage,
+//       };
+
+//       if (selectedPost) {
+//         await updateDoc(doc(collection(firestore, "posts"), selectedPost.id), post);
+//       } else {
+//         await addDoc(collection(firestore, "posts"), post);
+//       }
+
+//       onClose(); 
+//       window.location.reload();
+//     } catch (error) {
+//       console.error("Error saving post:", error);
+//     }
+//   };
+
+
+//   return (
+//     <Modal
+//       title={selectedPost ? "Edit Post" : "Create Post"}
+//       open={isOpen}
+//       onCancel={onClose}
+//       onOk={handleSave}
+//       footer={null}
+//     >
+//       <Form form={form} onFinish={handleSave}>
+//         <Form.Item label="Title" name="title" rules={[{ required: true }]}>
+//           <Input />
+//         </Form.Item>
+//         <Form.Item label="Content" name="content" rules={[{ required: true }]}>
+            
+//           <Input.TextArea />
+//         </Form.Item>
+//         <Form.Item label="Images">
+//                     <Upload
+//                         // onChange={handleImageChange}
+//                         beforeUpload={() => false}
+//                         multiple
+//                     >
+//                         <Button icon={<UploadOutlined />}>Upload Images</Button>
+//                     </Upload>
+//                 </Form.Item>
+//         <Form.Item>
+//           <Button type="primary" htmlType="submit">
+//             Save
+//           </Button>
+//         </Form.Item>
+//       </Form>
+//     </Modal>
+//   );
+// };
+
+// export default PostModal;
+
+import React, { useState, useEffect,useRef} from "react";
+import { Modal, Form, Input, Button, Upload } from "antd";
 import { firestore, storage } from "../../config/firebase";
+import { v4 as uuidv4 } from "uuid";
+import { ref, uploadBytes, getDownloadURL,deleteObject  } from "firebase/storage";
 import {
     collection,
     addDoc,
     updateDoc,
     doc,
     serverTimestamp,
-  } from "firebase/firestore";
+} from "firebase/firestore";
+import { UploadOutlined } from '@ant-design/icons';
 
 const PostModal = ({ isOpen, onClose, selectedPost }) => {
-  const [form] = Form.useForm();
+    const [form] = Form.useForm();
+    const [selectedImages, setSelectedImages] = useState([]);
 
-  useEffect(() => {
-    form.resetFields();
-    if (selectedPost) {
-      form.setFieldsValue({
-        title: selectedPost.title,
-        content: selectedPost.content,
-      });
-    }
-  }, [selectedPost, form]);
+    useEffect(() => {
+        form.resetFields();
+        if (selectedPost) {
+            form.setFieldsValue({
+                title: selectedPost.title,
+                content: selectedPost.content,
+            });
+            setSelectedImages(selectedPost.images || []);
+        } else {
+            setSelectedImages([]);
+        }
+    }, [selectedPost, form]);
 
     const handleSave = async () => {
-    try {
-      const values = await form.validateFields();
-      const post = {
-        title: values.title,
-        content: values.content,
-        timestamp: serverTimestamp(),
-      };
+        try {
+            const values = await form.validateFields();
+            const post = {
+                title: values.title,
+                content: values.content,
+                timestamp: serverTimestamp(),
+                images: selectedImages, 
+            };
+    
+            console.log("Post object before Firestore update:", post); 
+    
+            if (selectedPost) {
+                await updateDoc(doc(collection(firestore, "posts"), selectedPost.id), post);
+            } else {
+                await addDoc(collection(firestore, "posts"), post);
+            }
+            onClose();
+        } catch (error) {
+            console.error("Error saving post:", error);
+        }
+    };
+    
+    
+    const handleImageChange = async (info) => {
+        if (info.file.status === 'done') {
+            try {
+                const uniqueFilename = `${Date.now()}-${uuidv4()}`;
+                const storageRef = ref(storage, `postImages/${uniqueFilename}`);
+                const snapshot = await uploadBytes(storageRef, info.file.originFileObj);
+                const downloadURL = await getDownloadURL(snapshot.ref);
+                if (selectedImages.length > 0) {
+                    const oldImageRef = ref(storage, selectedImages[0]);
+                    await deleteObject(oldImageRef);
+                }
+                setSelectedImages([downloadURL]);
+            } catch (error) {
+                console.error("Error uploading image:", error);
+            }
+        }
+    };
+    
+    
 
-      if (selectedPost) {
-        await updateDoc(doc(collection(firestore, "posts"), selectedPost.id), post);
-      } else {
-        await addDoc(collection(firestore, "posts"), post);
-      }
-
-      onClose(); 
-      window.location.reload();
-    } catch (error) {
-      console.error("Error saving post:", error);
-    }
-  };
-
-
-  return (
-    <Modal
-      title={selectedPost ? "Edit Post" : "Create Post"}
-      open={isOpen}
-      onCancel={onClose}
-      onOk={handleSave}
-      footer={null}
-    >
-      <Form form={form} onFinish={handleSave}>
-        <Form.Item label="Title" name="title" rules={[{ required: true }]}>
-          <Input />
-        </Form.Item>
-        <Form.Item label="Content" name="content" rules={[{ required: true }]}>
-            
-          <Input.TextArea />
-        </Form.Item>
-        <Form.Item>
-          <Button type="primary" htmlType="submit">
-            Save
-          </Button>
-        </Form.Item>
-      </Form>
-    </Modal>
-  );
+    return (
+        <Modal
+            title={selectedPost ? "Edit Post" : "Create Post"}
+            visible={isOpen}
+            onCancel={onClose}
+            footer={null}
+        >
+            <Form form={form} onFinish={handleSave}>
+                <Form.Item label="Title" name="title" rules={[{ required: true }]}>
+                    <Input />
+                </Form.Item>
+                <Form.Item label="Content" name="content" rules={[{ required: true }]}>
+                    <Input.TextArea />
+                </Form.Item>
+                <Form.Item label="Images">
+                    <Upload
+                        onChange={handleImageChange}
+                        beforeUpload={() => false}
+                        multiple
+                    >
+                        <Button icon={<UploadOutlined />}>Upload Images</Button>
+                    </Upload>
+                </Form.Item>
+                <Form.Item>
+                    <Button type="primary" htmlType="submit">
+                        Save
+                    </Button>
+                </Form.Item>
+            </Form>
+        </Modal>
+    );
 };
 
 export default PostModal;

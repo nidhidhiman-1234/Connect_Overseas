@@ -64,6 +64,17 @@ const CounsellorList = () => {
     profilePicture: "",
     city: "",
     state: "",
+    totalEarning:"",
+    activeTime:"",
+    available:"",
+    callCount:"",
+    chatSessions:"",
+    country:"",
+    earningsMonth:"",
+    isActive:"",
+    isWaiting:"",
+    rating:"",
+    totalCallTime:"",
   });
   const [isDeleteModalVisible, setDeleteModalVisible] = useState(false);
   const [userToDelete, setUserToDelete] = useState(null);
@@ -107,19 +118,6 @@ const CounsellorList = () => {
   };
 
   const hasSelected = selectedRowKeys.length > 0;
-
-  // const handleDeleteCounsellor = async (id, e) => {
-  //   e.stopPropagation();
-
-  //   try {
-  //     await updateDoc(doc(firestore, "councellors", id), {
-  //       isDeleted: true,
-  //     });
-  //     fetchDataFromFirestore();
-  //   } catch (error) {
-  //     console.error("Error updating isDeleted:", error);
-  //   }
-  // };
 
   const handleDeleteCounsellor = (id, e) => {
     e.stopPropagation();
@@ -305,20 +303,6 @@ const CounsellorList = () => {
     fetchDataFromFirestore();
   }, []);
 
-  // const fetchDataFromFirestore = async () => {
-  //   try {
-  //     const querySnapshot = await getDocs(collection(firestore, "councellors"));
-  //     const firebaseData = querySnapshot.docs
-  //       .map((doc) => ({ id: doc.id, ...doc.data() }))
-  //       .filter((counsellor) => !counsellor.isDeleted);
-  //       console.log(firebaseData, "counsellor data");
-  //     setInitialData(firebaseData);
-  //     setDisplayedData(firebaseData.slice(0, 10));
-  //     setTotalRecords(firebaseData.length);
-  //   } catch (error) {
-  //     console.error("Error fetching data from Firebase:", error);
-  //   }
-  // };
   
   const fetchDataFromFirestore = async () => {
     try {
@@ -377,68 +361,9 @@ const CounsellorList = () => {
     }
   };
 
-  // const handleUpdateCounsellor = async () => {
-  //   try {
-  //     const values = await updateCounsellorForm.validateFields();
-  //     const updatedData = {
-  //       firstName: values.firstName,
-  //       lastName: values.lastName,
-  //       dateJoined: values.dateJoined.toDate(), 
-  //       email: values.email,
-  //       phone: values.phone,
-  //       city: values.city,
-  //       state: values.state,
-  //     };
-
-  //     await updateDoc(
-  //       doc(firestore, "councellors", selectedUser.id),
-  //       updatedData
-  //     );
-
-  //     updateCounsellorForm.setFieldsValue(updatedData);
-
-  //     setEditModal(false);
-  //     fetchDataFromFirestore();
-  //   } catch (error) {
-  //     console.error("Error updating counsellor:", error);
-  //   }
-  // };
-
   const rowClassName = (record, index) => {
     return "pointer-cursor";
   };
-
-
-  // const handleAddCounsellor = async () => {
-  //   try {
-  //     const values = await addCounsellorForm.validateFields();
-  
-  //     const newData = {
-  //      id: values.phone,
-  //       firstName: values.firstName,
-  //       lastName: values.lastName,
-  //       dateJoined: values.dateJoined.toDate(),
-  //       phone: values.phone,
-  //       city: values.city,
-  //       state: values.state,
-  //       email: values.email,
-  //       isDeleted: false,
-  //       image: selectedImage
-  //     };
-  
-  //     newData.id = values.phone;
-  
-  //     const docRef = await addDoc(collection(firestore, "councellors"), newData);
-  
-  //     addCounsellorForm.resetFields();
-  //     setIsModalVisible(false);
-  
-  //     fetchDataFromFirestore();
-  //   } catch (error) {
-  //     console.error("Error adding new counsellor:", error);
-  //   }
-  // };
-  
 
   const handleAddCounsellor = async () => {
     try {
@@ -453,7 +378,19 @@ const CounsellorList = () => {
         state: values.state,
         email: values.email,
         isDeleted: false,
-        image: selectedImage
+        image: selectedImage,
+        totalEarning:"10000",
+        activeTime:"200",
+        available:true,
+        callCount:"26",
+        chatSessions:"5",
+        country:"india",
+        earningsMonth:"1000",
+        isActive:false,
+        rating:"5",
+        totalCallTime:"400",
+        isWaiting:"false",
+
       };
       const counsellorRef = doc(firestore, "councellors", values.phone);
   
@@ -576,20 +513,6 @@ const CounsellorList = () => {
         >
           + Add new Counsellor
         </Button>
-        {/* <Button
-          onClick={loadAllData}
-          style={{
-            color: "rgba(0, 0, 0, 1)",
-            border: "none",
-            marginLeft: "110.5%",
-            Weight: "500",
-            fontSize: "12px",
-            fontFamily: "Inter, sans-serif",
-            fontWeight: "bold",
-          }}
-        >
-          View All
-        </Button> */}
           {shouldRenderViewAllButton && (
           <Button
             onClick={loadAllData}

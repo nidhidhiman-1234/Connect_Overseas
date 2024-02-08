@@ -11,6 +11,7 @@ import AddPost from './pages/admin/addPost';
 import AddAdvertisement from './pages/admin/addAdvertisement';
 import Advertisement from './pages/admin/advertisements';
 import Post from './pages/admin/posts';
+import UpdateUser from './pages/user/userProfile';
 
 function App() {
   return (
@@ -23,6 +24,7 @@ function App() {
           <Route exact path="/counsellorlist" element={<CounsellorList />} />
           <Route exact path="/userlist" element={<UserList />} />
           <Route path="/counsellor" element={<UpdateCounsellor />} />
+          <Route path="/user" element={<UpdateUser />} />
           <Route path="/admin" element={<AdminProfile/>} />
           <Route path="/post" element={<AddPost/>} />
           {/* <Route path="/emo" element={<CustomInputWithEmoji />} /> */}

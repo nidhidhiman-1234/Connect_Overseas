@@ -119,6 +119,7 @@ const Advertisement = () => {
         >
           Add New Advertisement
         </Button>
+        
       {advertisements.map((advertisement) => (
         <Card
         key={advertisement.id}
@@ -150,7 +151,6 @@ const Advertisement = () => {
               {advertisement.active ? 'Active' : 'Inactive'}
       
     </Space>
-   
    
             <IconButton
               style={{

@@ -1,18 +1,29 @@
-import React, { useState, useEffect } from "react";
-import { Button, Table, Space, Input,Radio,Modal } from "antd";
+import React, { useState, useEffect,useRef } from "react";
+import { useNavigate,useLocation  } from 'react-router-dom';
+import { Button, Table, Space, Input,Radio,Modal, Form,Avatar } from "antd";
 import Layout from "../layout/layout";
-import { firestore }from "../config/firebase";
+import { firestore, storage } from "../config/firebase";
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { v4 as uuidv4 } from "uuid";
 
-import { collection, getDocs,updateDoc,doc,getDoc } from 'firebase/firestore';
+import {  collection,
+  getDocs,
+  addDoc,
+  updateDoc,
+  getDoc,
+  setDoc,
+   doc } from 'firebase/firestore';
 import {
   EditOutlined,
   DeleteOutlined,
   SearchOutlined,
+  UserOutlined
 } from "@ant-design/icons";
 
 
 
 const UserList = () => {
+  const navigate = useNavigate();
   const [selectedRowKeys, setSelectedRowKeys] = useState([]);
   const [loading, setLoading] = useState(false);
   const [totalRecords, setTotalRecords] = useState(10);
@@ -21,7 +32,35 @@ const UserList = () => {
   const [displayedData, setDisplayedData] = useState(initialData.slice(0, 10));
   const [isDeleteModalVisible, setDeleteModalVisible] = useState(false);
   const [userToDelete, setUserToDelete] = useState(null);
-  
+  const [addUserForm] = Form.useForm();
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [selectedImage, setSelectedImage] = useState(null);
+  const fileInputRef = useRef(null);
+  const [selectedUser, setSelectedUser] = useState(null);
+  const [selectedItem, setSelectedItem] = useState("");
+  const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/i;
+  const [formData, setFormData] = useState({
+    firstName: "",
+    lastName: "",
+    dateJoined: "",
+    email: "",
+    phone: "",
+    profilePicture: "",
+    city: "",
+    state: "",
+    totalEarning:"",
+    activeTime:"",
+    available:"",
+    callCount:"",
+    chatSessions:"",
+    country:"",
+    earningsMonth:"",
+    isActive:"",
+    isWaiting:"",
+    rating:"",
+    totalCallTime:"",
+  });
+
   const handleStatusChange = (e, key) => {
     const updatedDisplayedData = displayedData.map((item) =>
       item.key === key ? { ...item, status: e.target.value } : item
@@ -165,20 +204,15 @@ const UserList = () => {
     align: "center",
   },
   {
-    title: "Interests",
-    dataIndex: "country",
-    align: "center",
-  },
-  {
-    title: "Interests",
+    title: "Purpose",
     dataIndex: "purpose",
     align: "center",
   },
-  {
-    title: "Total Minutes Spent On Calls",
-    dataIndex: "total",
-    align: "center",
-  },
+  // {
+  //   title: "Total Minutes Spent On Calls",
+  //   dataIndex: "total",
+  //   align: "center",
+  // },
   {
     title: "Status",
     dataIndex: "isActive",
@@ -274,44 +308,69 @@ const UserList = () => {
 
   const shouldRenderViewAllButton = displayedData.length > 10;
 
-  // const handleProfile = async () => {
-  //   firestore()
-  //     .collection('users')
-  //     .doc(number)
-  //     .get()
-  //     .then(documentSnapshot => {
-  //       if (documentSnapshot.exists) {
-  //         console.log('User data: ', documentSnapshot.data());
-  //         handleUserData(documentSnapshot.data());
-  //         firestore()
-  //           .collection('users')
-  //           .doc(number)
-  //           .update({
-  //             isActive: true,
-  //           })
-  //           .then(() => {
-  //             console.log('User updated!');
-  //           });
-  //       } else {
-  //         firestore()
-  //           .collection('users')
-  //           .doc(number)
-  //           .set({
-  //             firstName: 'firstName',
-  //             lastName: 'lastName',
-  //             email: 'email',
-  //             purpose: 'Study',
-  //             phone: number,
-  //             isActive: true,
-  //             country: 'Canada',
-  //           })
-  //           .then(() => {
-  //             console.log('doc written');
-  //           });
-  //       }
-  //     });
-  // };
+  const handleAddUser = async () => {
+    try {
+      const values = await addUserForm.validateFields();
+  
+      const newData = {
+        firstName: values.firstName,
+        lastName: values.lastName,
+        phone: values.phone,
+        city: values.city,
+        email: values.email,
+        isDeleted: false,
+        image: selectedImage,
+        country:values.country,
+        isActive:false,
+        isWaiting:false,
+        purpose:values.purpose
 
+      };
+      const counsellorRef = doc(firestore, "users", values.phone);
+  
+      await setDoc(counsellorRef, newData);
+  
+      addUserForm.resetFields();
+      setIsModalVisible(false);
+  
+      fetchDataFromFirestore();
+    } catch (error) {
+      console.error("Error adding new users:", error);
+    }
+  };
+ 
+  const handleFileInputChange = (e) => {
+    const selectedFile = e.target.files[0];
+    console.log("Selected File:", selectedFile);
+    if (selectedFile) {
+      const uniqueFilename = `${Date.now()}-${uuidv4()}`;
+      const storageRef = ref(storage, `avatars/${uniqueFilename}`);
+
+      uploadBytes(storageRef, selectedFile)
+        .then((snapshot) => getDownloadURL(snapshot.ref))
+        .then((downloadURL) => {
+          console.log("Download URL:", downloadURL);
+          setSelectedImage(downloadURL);
+
+          setSelectedItem("");
+        })
+        .catch((error) => {
+          console.error("Error uploading image:", error);
+        });
+    }
+  };
+  
+  
+  const handleEditIconClick = (e,record) => {
+    e.stopPropagation();
+    setSelectedUser(record);
+    fileInputRef.current.click();
+  };
+
+
+  const rowClassName = (record, index) => {
+    return "pointer-cursor";
+  };
 
   return (
     
@@ -367,7 +426,8 @@ const UserList = () => {
          
       </div>
   <div style={{ marginBottom: 16 }}>
-        {/* <Button 
+        <Button 
+         onClick={() => setIsModalVisible(true)}
           style={{
             width: "173px",
             height: "43px",
@@ -387,21 +447,8 @@ const UserList = () => {
           }}
         >
           + Add new User
-        </Button> */}
-        {/* <Button
-          onClick={loadAllData}
-          style={{
-            color: "rgba(0, 0, 0, 1)",
-            border: "none",
-            marginLeft: "93.5%",
-            Weight: "500",
-            fontSize: "12px",
-            fontFamily: "Inter, sans-serif",
-            fontWeight: "bold",
-          }}
-        >
-          View All
-        </Button> */}
+        </Button>
+    
         {shouldRenderViewAllButton && (
           <Button
             onClick={loadAllData}
@@ -433,6 +480,104 @@ const UserList = () => {
             Delete All
           </Button>
         )}
+          <Modal
+          title="Add New User"
+          open={isModalVisible}
+          onCancel={() => setIsModalVisible(false)}
+          onOk={handleAddUser}
+        >
+          <div>
+            <Avatar
+              size={64}
+              icon={<UserOutlined />}
+              style={{ position: 'relative' }}
+              onClick={handleEditIconClick}
+              src={selectedImage} alt="Selected"
+            >
+            
+            </Avatar>
+        
+            <input
+              type="file"
+              ref={fileInputRef}
+              style={{ display: 'none' }}
+               onChange={(e) => handleFileInputChange(e)}
+              
+            />
+        
+            <EditOutlined style={{ marginLeft: '-7px' }} />
+    </div>
+
+         
+          <Form form={addUserForm} initialValues={{}}>
+            <Form.Item
+              label="First Name"
+              name="firstName"
+              rules={[
+                { required: true, message: "Please enter First Name" },
+                {
+                  pattern: /^[a-zA-Z]+$/,
+                  message: "Please enter only letters in the First Name field",
+                },
+              ]}
+            >
+              <Input
+               type="text"
+               inputMode="text"/>
+            </Form.Item>
+            <Form.Item label="Last Name" name="lastName">
+              <Input />
+            </Form.Item>
+        
+            <Form.Item
+              label="Email"
+              name="email"
+              rules={[
+                { required: true, message: "Please enter email" },
+                {
+                  pattern: emailRegex,
+                  message: "Please enter a valid email address",
+                },
+              ]}
+            >
+              <Input />
+            </Form.Item>
+
+            <Form.Item
+              label="Phone Number"
+              name="phone"
+              type="tel"
+              rules={[
+                { required: true, message: "Please enter Phone Number" },
+                {
+                  pattern: /^[0-9]{10}$/,
+                  message: "Please enter a valid 10-digit phone number",
+                },
+              ]}
+            >
+              <Input maxLength={10} />
+            </Form.Item>
+
+            <Form.Item
+              label="Purpose"
+              name="purpose"
+            >
+              <Input />
+            </Form.Item>
+            <Form.Item
+              label="City"
+              name="city"
+            >
+              <Input />
+            </Form.Item>
+            <Form.Item
+              label="Country"
+              name="country"
+            >
+              <Input />
+            </Form.Item>
+          </Form>
+        </Modal>
       </div>
      
   
@@ -442,6 +587,16 @@ const UserList = () => {
         dataSource={displayedData}
         pagination={false}
         rowKey="id" 
+        rowClassName={rowClassName}
+        onRow={(record) => ({
+          onClick: () => {
+            if (!record.isBlocked) {
+              setSelectedUser(record);
+              navigate('/user', { state: { selectedUser: record } });
+            }
+          
+          },
+        })}
       />
       <div  style={{
         marginTop:"30px",

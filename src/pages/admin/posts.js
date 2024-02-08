@@ -219,7 +219,7 @@ const Post = () => {
               </Linkify>
             </Typography>
 
-            {post.images && post.images?.length > 0 && (
+            {post.images && Array.isArray(post.images) && post.images.length > 0 && (
               <div
                 style={{
                   display: "flex",
@@ -227,7 +227,7 @@ const Post = () => {
                   alignItems: "center",
                 }}
               >
-                {post.images?.map((imageUrl, index) => (
+                {post.images.map((imageUrl, index) => (
                   <img
                     key={index}
                     src={imageUrl}
