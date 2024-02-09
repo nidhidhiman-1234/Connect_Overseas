@@ -32,6 +32,7 @@ import {
   SearchOutlined,
   UserOutlined,
 } from "@ant-design/icons";
+import CounsellorTabs from "./cousellorTabs";
 
 const UpdateCounsellor = ({}) => {
   const navigate = useNavigate();
@@ -192,10 +193,15 @@ const UpdateCounsellor = ({}) => {
         maxHeight: "100vh",
         paddingRight: "0px",
         width: "97.5%",
+        marginTop:"-50px"
       }}
     >
       <Layout />
-      <div style={{ marginTop: "-60px", alignItems: "center" ,width: "50%" }}>
+
+<CounsellorTabs/>
+
+
+      <div style={{ marginTop: "10px", alignItems: "center" ,width: "50%" }}>
         
             <Form
               form={updateCounsellorForm}

@@ -170,8 +170,7 @@ import {
 
 const AdvertisementModal = ({ isOpen, onClose, selectedAdvertisement }) => {
     const [form] = Form.useForm();
-    const [logoFile, setLogoFile] = useState(null);
-    const [imageUrl, setImageUrl] = useState("");
+    const [selectedImages, setSelectedImages] = useState([]);
 
     useEffect(() => {
         form.resetFields();
@@ -182,42 +181,30 @@ const AdvertisementModal = ({ isOpen, onClose, selectedAdvertisement }) => {
                 rating: selectedAdvertisement.rating,
                 link: selectedAdvertisement.link,
             });
-            setImageUrl(selectedAdvertisement.logo); 
+            setSelectedImages(selectedAdvertisement.logo || []);
+        } else {
+            setSelectedImages([]);
         }
     }, [selectedAdvertisement, form]);
 
-    const handleLogoChange = (info) => {
-        if (info.file.status === "done") {
-            setLogoFile(info.file.originFileObj);
-            const url = URL.createObjectURL(info.file.originFileObj);
-            setImageUrl(url);
-        }
-    };
 
     const handleSave = async () => {
         try {
             const values = await form.validateFields();
-            let logoUrl = imageUrl;
-
-            if (logoFile) {
-                logoUrl = await uploadLogo(logoFile);
-            }
-
             const advertisement = {
                 title: values.title,
                 description: values.description,
                 timestamp: serverTimestamp(),
                 rating: values.rating,
                 link: values.link,
-                logo: logoUrl,
+                logo: selectedImages,
             };
 
             if (selectedAdvertisement) {
-                await updateAdvertisement(selectedAdvertisement.id, advertisement);
+                await updateDoc(doc(collection(firestore, "advertisements"), selectedAdvertisement.id), advertisement);
             } else {
-                await addAdvertisement(advertisement);
+                await addDoc(collection(firestore, "advertisements"), advertisement);
             }
-
             onClose();
             window.location.reload(); 
         } catch (error) {
@@ -225,47 +212,24 @@ const AdvertisementModal = ({ isOpen, onClose, selectedAdvertisement }) => {
         }
     };
 
-    const uploadLogo = async (file) => {
-      try {
-        console.log("Uploading logo...");
-        const uniqueFilename = `${Date.now()}-${uuidv4()}`;
-        const storageRef = ref(storage, `AdvtImages/${uniqueFilename}`);
-        console.log("Storage reference:", storageRef);
+    const handleLogoChange = async (info) => {
+        const { fileList } = info;
+        const uploadedImages = fileList.map(file => file.originFileObj);
     
-        await uploadBytes(storageRef, file);
-        console.log("Upload successful.");
-    
-        const downloadUrl = await getDownloadURL(storageRef);
-        console.log("Download URL:", downloadUrl);
-    
-        return downloadUrl;
-      } catch (error) {
-        console.error("Error uploading logo:", error);
-        throw error;
-      }
-    };
-    
-
-    const addAdvertisement = async (advertisement) => {
-        try {
-            await addDoc(collection(firestore, "advertisements"), advertisement);
-        } catch (error) {
-            console.error("Error adding advertisement:", error);
-            throw error;
-        }
-    };
-
-    const updateAdvertisement = async (advertisementId, advertisement) => {
-        try {
-            await updateDoc(
-                doc(collection(firestore, "advertisements"), advertisementId),
-                advertisement
+        if (uploadedImages.length > 0) {
+            const newImageUrls = await Promise.all(
+                uploadedImages.map(async (image) => {
+                    const uniqueFilename = `${Date.now()}-${uuidv4()}`;
+                    const storageRef = ref(storage, `advtImages/${uniqueFilename}`);
+                    await uploadBytes(storageRef, image);
+                    return getDownloadURL(storageRef);
+                })
             );
-        } catch (error) {
-            console.error("Error updating advertisement:", error);
-            throw error;
-        }
+    
+            setSelectedImages(newImageUrls);
+        } 
     };
+    
 
     return (
         <Modal

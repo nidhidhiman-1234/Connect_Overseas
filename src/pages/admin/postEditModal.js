@@ -117,6 +117,9 @@ const PostModal = ({ isOpen, onClose, selectedPost }) => {
         }
     }, [selectedPost, form]);
 
+
+ 
+    
     const handleSave = async () => {
         try {
             const values = await form.validateFields();
@@ -126,8 +129,6 @@ const PostModal = ({ isOpen, onClose, selectedPost }) => {
                 timestamp: serverTimestamp(),
                 images: selectedImages, 
             };
-    
-            console.log("Post object before Firestore update:", post); 
     
             if (selectedPost) {
                 await updateDoc(doc(collection(firestore, "posts"), selectedPost.id), post);
@@ -140,24 +141,24 @@ const PostModal = ({ isOpen, onClose, selectedPost }) => {
         }
     };
     
-    
     const handleImageChange = async (info) => {
-        if (info.file.status === 'done') {
-            try {
-                const uniqueFilename = `${Date.now()}-${uuidv4()}`;
-                const storageRef = ref(storage, `postImages/${uniqueFilename}`);
-                const snapshot = await uploadBytes(storageRef, info.file.originFileObj);
-                const downloadURL = await getDownloadURL(snapshot.ref);
-                if (selectedImages.length > 0) {
-                    const oldImageRef = ref(storage, selectedImages[0]);
-                    await deleteObject(oldImageRef);
-                }
-                setSelectedImages([downloadURL]);
-            } catch (error) {
-                console.error("Error uploading image:", error);
-            }
-        }
+        const { fileList } = info;
+        const uploadedImages = fileList.map(file => file.originFileObj);
+    
+        if (uploadedImages.length > 0) {
+            const newImageUrls = await Promise.all(
+                uploadedImages.map(async (image) => {
+                    const uniqueFilename = `${Date.now()}-${uuidv4()}`;
+                    const storageRef = ref(storage, `postImages/${uniqueFilename}`);
+                    await uploadBytes(storageRef, image);
+                    return getDownloadURL(storageRef);
+                })
+            );
+    
+            setSelectedImages(newImageUrls);
+        } 
     };
+    
     
     
 
@@ -176,14 +177,15 @@ const PostModal = ({ isOpen, onClose, selectedPost }) => {
                     <Input.TextArea />
                 </Form.Item>
                 <Form.Item label="Images">
-                    <Upload
-                        onChange={handleImageChange}
-                        beforeUpload={() => false}
-                        multiple
-                    >
-                        <Button icon={<UploadOutlined />}>Upload Images</Button>
-                    </Upload>
-                </Form.Item>
+        <Upload
+            onChange={handleImageChange}
+            beforeUpload={() => false}
+            multiple
+        >
+            <Button icon={<UploadOutlined />}>Upload Images</Button>
+        </Upload>
+    </Form.Item>
+
                 <Form.Item>
                     <Button type="primary" htmlType="submit">
                         Save

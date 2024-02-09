@@ -12,6 +12,7 @@ import AddAdvertisement from './pages/admin/addAdvertisement';
 import Advertisement from './pages/admin/advertisements';
 import Post from './pages/admin/posts';
 import UpdateUser from './pages/user/userProfile';
+import CounsellorTabs from './pages/counsellor/cousellorTabs';
 
 function App() {
   return (
@@ -31,6 +32,7 @@ function App() {
           <Route path="/advertisements" element={<Advertisement/>} />
           <Route path="/advertisement" element={<AddAdvertisement/>} />
           <Route path="/posts" element={<Post/>} />
+          <Route path="/tabs" element={<CounsellorTabs/>} />
         </Routes>
       </div>
     </BrowserRouter>

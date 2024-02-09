@@ -9,8 +9,9 @@ import {
   Space,
   DatePicker,
   Avatar,
+ 
 } from "antd";
-import { PlusOutlined } from "@ant-design/icons";
+import { StarOutlined, StarFilled } from "@ant-design/icons";
 import Layout from "../layout/layout";
 import { firestore, storage } from "../config/firebase";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
@@ -32,6 +33,7 @@ import {
   SearchOutlined,
   UserOutlined,
 } from "@ant-design/icons";
+
 
 const CounsellorList = () => {
   const navigate = useNavigate();
@@ -165,7 +167,36 @@ const CounsellorList = () => {
     }
   };
 
+
+const handleFeatureChange = async (record, e) => {
+  e.stopPropagation(); 
+  try {
+    const updatedIsFeatured = !record.isFeatured;
+    await updateDoc(doc(firestore, "councellors", record.id), {
+      isFeatured: updatedIsFeatured,
+    });
+    fetchDataFromFirestore();
+  } catch (error) {
+    console.error("Error updating isFeatured:", error);
+  }
+};
+
+
   const columns = [
+    {
+      title: "Featured Councellor",
+      dataIndex: "isFeatured",
+      align: "center",
+      render: (text, record) => (
+        <span
+          onClick={(e) => handleFeatureChange(record, e)}
+          style={{ cursor: "pointer" }}
+        >
+          {record.isFeatured ? <StarFilled style={{ color: "blue" }} /> : <StarOutlined />}
+        </span>
+      ),
+      
+    },
     {
       title: "Counsellor ID",
       dataIndex: "id",
@@ -459,6 +490,7 @@ const CounsellorList = () => {
   Are you sure you want to delete this user?
   
 </Modal>
+
       <div style={{ marginTop: "-60px", alignItems: "center" }}>
         <Input
           className="placeholder_search"
