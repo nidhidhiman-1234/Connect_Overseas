@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Tab, Tabs, TabList, TabPanel } from 'react-tabs';
-import 'react-tabs/style/react-tabs.css';
+// import 'react-tabs/style/react-tabs.css';
 
 const CounsellorTabs = () => {
   const [activeTab, setActiveTab] = useState(0);
