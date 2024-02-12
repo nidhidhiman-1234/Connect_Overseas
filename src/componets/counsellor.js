@@ -77,6 +77,7 @@ const CounsellorList = () => {
     isWaiting:"",
     rating:"",
     totalCallTime:"",
+    price:"",
   });
   const [isDeleteModalVisible, setDeleteModalVisible] = useState(false);
   const [userToDelete, setUserToDelete] = useState(null);
@@ -421,6 +422,7 @@ const handleFeatureChange = async (record, e) => {
         rating:"5",
         totalCallTime:"400",
         isWaiting:"false",
+        price:"10",
 
       };
       const counsellorRef = doc(firestore, "councellors", values.phone);
