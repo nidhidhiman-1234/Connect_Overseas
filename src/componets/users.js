@@ -281,11 +281,27 @@ const UserList = () => {
     }
   };
 
+  // const handleSearch = (value) => {
+  //   setSearchText(value);
+
+  //   const filteredData = initialData.filter((item) =>
+  //     item.firstName.toLowerCase().includes(value.toLowerCase())
+  //   );
+  //   setDisplayedData(filteredData);
+  //   setTotalRecords(filteredData.length);
+  // };
+
+
   const handleSearch = (value) => {
     setSearchText(value);
-
+  
     const filteredData = initialData.filter((item) =>
-      item.firstName.toLowerCase().includes(value.toLowerCase())
+    `${item.firstName} ${item.lastName}`.toLowerCase().includes(value.toLowerCase()) ||
+      item.firstName.toLowerCase().includes(value.toLowerCase()) ||
+      item.lastName.toLowerCase().includes(value.toLowerCase()) ||
+      item.id.toLowerCase().includes(value.toLowerCase()) ||
+      item.email.toLowerCase().includes(value.toLowerCase()) ||
+      item.phone.includes(value)
     );
     setDisplayedData(filteredData);
     setTotalRecords(filteredData.length);

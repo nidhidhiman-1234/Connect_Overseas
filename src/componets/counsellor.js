@@ -1,5 +1,5 @@
-import React, { useState, useEffect,useRef } from "react";
-import { useNavigate,useLocation  } from 'react-router-dom';
+import React, { useState, useEffect, useRef } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 import {
   Button,
   Table,
@@ -9,8 +9,8 @@ import {
   Space,
   DatePicker,
   Avatar,
- 
 } from "antd";
+
 import { StarOutlined, StarFilled } from "@ant-design/icons";
 import Layout from "../layout/layout";
 import { firestore, storage } from "../config/firebase";
@@ -24,7 +24,7 @@ import {
   updateDoc,
   getDoc,
   setDoc,
-   doc
+  doc,
 } from "firebase/firestore";
 
 import {
@@ -33,7 +33,6 @@ import {
   SearchOutlined,
   UserOutlined,
 } from "@ant-design/icons";
-
 
 const CounsellorList = () => {
   const navigate = useNavigate();
@@ -53,9 +52,16 @@ const CounsellorList = () => {
   const [selectedItem, setSelectedItem] = useState("");
   const [selectedImage, setSelectedImage] = useState(null);
   const fileInputRef = useRef(null);
-
-
-  
+  const [isDatePickerVisible, setIsDatePickerVisible] = useState(false);
+  const { RangePicker } = DatePicker;
+  const [selectedCity, setSelectedCity] = useState(null);
+  const [selectedState, setSelectedState] = useState(null);
+  const [selectedStatus, setSelectedStatus] = useState("all");
+  const [minEarnings, setMinEarnings] = useState(null);
+  const [maxEarnings, setMaxEarnings] = useState(null);
+  const [minTotalCalls, setMinTotalCalls] = useState(null);
+  const [maxTotalCalls, setMaxTotalCalls] = useState(null);
+  const [isFilterListVisible, setIsFilterListVisible] = useState(false);
   const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/i;
   const [formData, setFormData] = useState({
     firstName: "",
@@ -66,26 +72,27 @@ const CounsellorList = () => {
     profilePicture: "",
     city: "",
     state: "",
-    totalEarning:"",
-    activeTime:"",
-    available:"",
-    callCount:"",
-    chatSessions:"",
-    country:"",
-    earningsMonth:"",
-    isActive:"",
-    isWaiting:"",
-    rating:"",
-    totalCallTime:"",
-    price:"",
+    totalEarning: "",
+    activeTime: "",
+    available: "",
+    callCount: "",
+    chatSessions: "",
+    country: "",
+    earningsMonth: "",
+    isActive: "",
+    isWaiting: "",
+    rating: "",
+    totalCallTime: "",
+    price: "",
   });
   const [isDeleteModalVisible, setDeleteModalVisible] = useState(false);
   const [userToDelete, setUserToDelete] = useState(null);
+
   const showDeleteModal = (id) => {
     setUserToDelete(id);
     setDeleteModalVisible(true);
   };
-  
+
   const hideDeleteModal = () => {
     setUserToDelete(null);
     setDeleteModalVisible(false);
@@ -126,34 +133,32 @@ const CounsellorList = () => {
     e.stopPropagation();
     showDeleteModal(id);
   };
-  
+
   const handleDeleteConfirmed = async () => {
     try {
       const userRef = doc(firestore, "councellors", userToDelete);
       const userSnapshot = await getDoc(userRef);
-  
+
       if (userSnapshot.exists()) {
         await updateDoc(userRef, {
           isDeleted: true,
         });
-  
+
         console.log("councellor successfully deleted.");
         fetchDataFromFirestore();
       } else {
         console.log("councellors not found with ID:", userToDelete);
       }
-  
+
       hideDeleteModal();
     } catch (error) {
       console.error("Error updating isDeleted:", error);
     }
   };
-  
 
   const handleDeleteCancelled = () => {
     hideDeleteModal();
   };
-
 
   const handleBlockCounsellor = async (id, isBlocked, e) => {
     e.stopPropagation();
@@ -168,20 +173,18 @@ const CounsellorList = () => {
     }
   };
 
-
-const handleFeatureChange = async (record, e) => {
-  e.stopPropagation(); 
-  try {
-    const updatedIsFeatured = !record.isFeatured;
-    await updateDoc(doc(firestore, "councellors", record.id), {
-      isFeatured: updatedIsFeatured,
-    });
-    fetchDataFromFirestore();
-  } catch (error) {
-    console.error("Error updating isFeatured:", error);
-  }
-};
-
+  const handleFeatureChange = async (record, e) => {
+    e.stopPropagation();
+    try {
+      const updatedIsFeatured = !record.isFeatured;
+      await updateDoc(doc(firestore, "councellors", record.id), {
+        isFeatured: updatedIsFeatured,
+      });
+      fetchDataFromFirestore();
+    } catch (error) {
+      console.error("Error updating isFeatured:", error);
+    }
+  };
 
   const columns = [
     {
@@ -193,10 +196,13 @@ const handleFeatureChange = async (record, e) => {
           onClick={(e) => handleFeatureChange(record, e)}
           style={{ cursor: "pointer" }}
         >
-          {record.isFeatured ? <StarFilled style={{ color: "blue" }} /> : <StarOutlined />}
+          {record.isFeatured ? (
+            <StarFilled style={{ color: "blue" }} />
+          ) : (
+            <StarOutlined />
+          )}
         </span>
       ),
-      
     },
     {
       title: "Counsellor ID",
@@ -250,11 +256,11 @@ const handleFeatureChange = async (record, e) => {
       dataIndex: "earningsMonth",
       align: "center",
     },
-    {
-      title: "Available",
-      dataIndex: "available",
-      align: "center",
-    },
+    // {
+    //   title: "Available",
+    //   dataIndex: "available",
+    //   align: "center",
+    // },
     {
       title: "Email",
       dataIndex: "email",
@@ -335,30 +341,35 @@ const handleFeatureChange = async (record, e) => {
     fetchDataFromFirestore();
   }, []);
 
-  
   const fetchDataFromFirestore = async () => {
     try {
       const querySnapshot = await getDocs(collection(firestore, "councellors"));
       const firebaseData = querySnapshot.docs
         .map((doc) => ({ id: doc.id, ...doc.data() }))
         .filter((counsellor) => !counsellor.isDeleted);
-  
+
       console.log(firebaseData, "counsellor data");
-  
+
       const updatedFirebaseData = firebaseData.map((counsellor) => {
         const timestampObject = counsellor.dateJoined;
-  
-        if (timestampObject && timestampObject.seconds && timestampObject.nanoseconds !== undefined) {
-          const dateJoined = new Date(timestampObject.seconds * 1000 + timestampObject.nanoseconds / 1e6);
+
+        if (
+          timestampObject &&
+          timestampObject.seconds &&
+          timestampObject.nanoseconds !== undefined
+        ) {
+          const dateJoined = new Date(
+            timestampObject.seconds * 1000 + timestampObject.nanoseconds / 1e6
+          );
           return {
             ...counsellor,
-            dateJoined: dateJoined.toISOString().split('T')[0],
+            dateJoined: dateJoined.toISOString().split("T")[0],
           };
         } else {
           return counsellor;
         }
       });
-  
+
       setInitialData(updatedFirebaseData);
       setDisplayedData(updatedFirebaseData.slice(0, 10));
       setTotalRecords(updatedFirebaseData.length);
@@ -366,14 +377,118 @@ const handleFeatureChange = async (record, e) => {
       console.error("Error fetching data from Firebase:", error);
     }
   };
-  
+
+  // const handleSearch = (value) => {
+  //   setSearchText(value);
+
+  //   const filteredData = initialData.filter((item) =>
+  //     item.firstName.toLowerCase().includes(value.toLowerCase())
+  //   );
+  //   setDisplayedData(filteredData);
+  //   setTotalRecords(filteredData.length);
+  // };
 
   const handleSearch = (value) => {
     setSearchText(value);
 
-    const filteredData = initialData.filter((item) =>
-      item.name.toLowerCase().includes(value.toLowerCase())
+    const filteredData = initialData.filter(
+      (item) =>
+        `${item.firstName} ${item.lastName}`
+          .toLowerCase()
+          .includes(value.toLowerCase()) ||
+        item.firstName.toLowerCase().includes(value.toLowerCase()) ||
+        item.lastName.toLowerCase().includes(value.toLowerCase()) ||
+        item.id.toLowerCase().includes(value.toLowerCase()) ||
+        item.email.toLowerCase().includes(value.toLowerCase()) ||
+        item.phone.includes(value)
     );
+    setDisplayedData(filteredData);
+    setTotalRecords(filteredData.length);
+  };
+
+  // const handleDateFilter = (dates, dateStrings) => {
+  //   if (dates) {
+  //     const startDate = dates[0].format('YYYY-MM-DD');
+  //     const endDate = dates[1].format('YYYY-MM-DD');
+
+  //     console.log('Start date:', startDate);
+  //     console.log('End date:', endDate);
+
+  //     const filteredData = initialData.filter((item) => {
+  //       const itemDate = moment(item.dateJoined, 'YYYY-MM-DD');
+  //       return itemDate.isBetween(startDate, endDate, null, '[]');
+  //     });
+
+  //     setDisplayedData(filteredData);
+  //     setTotalRecords(filteredData.length);
+  //   }
+  // };
+
+  // const handleImageClick = () => {
+  //   console.log('Image clicked');
+  //   setIsDatePickerVisible(prevState => !prevState);
+  // };
+
+  const handleImageClick = () => {
+    console.log("Image clicked");
+    setIsFilterListVisible(prevState => !prevState);
+  };
+
+  const closeFilterList = () => {
+    setIsFilterListVisible(false);
+  };
+
+  const handleDateFilter = (dates, dateStrings) => {
+    if (dates) {
+      const startDate = dates[0].format("YYYY-MM-DD");
+      const endDate = dates[1].format("YYYY-MM-DD");
+
+      console.log("Start date:", startDate);
+      console.log("End date:", endDate);
+
+      applyFilters(startDate, endDate);
+    }
+  };
+
+  const applyFilters = (startDate, endDate) => {
+    let filteredData = [...initialData];
+    console.log(filteredData, "filteredDatafilteredData");
+    if (selectedCity) {
+      filteredData = filteredData.filter((item) => item.city === selectedCity);
+    }
+
+    if (selectedState) {
+      filteredData = filteredData.filter(
+        (item) => item.state === selectedState
+      );
+    }
+
+    if (selectedStatus !== "all") {
+      filteredData = filteredData.filter(
+        (item) => item.status === selectedStatus
+      );
+    }
+
+    if (minEarnings !== null && maxEarnings !== null) {
+      filteredData = filteredData.filter((item) => {
+        return item.earnings >= minEarnings && item.earnings <= maxEarnings;
+      });
+    }
+
+    if (minTotalCalls !== null && maxTotalCalls !== null) {
+      filteredData = filteredData.filter((item) => {
+        return (
+          item.totalCalls >= minTotalCalls && item.totalCalls <= maxTotalCalls
+        );
+      });
+    }
+    if (startDate && endDate) {
+      filteredData = filteredData.filter((item) => {
+        const itemDate = moment(item.dateJoined, "YYYY-MM-DD");
+        return itemDate.isBetween(startDate, endDate, null, "[]");
+      });
+    }
+
     setDisplayedData(filteredData);
     setTotalRecords(filteredData.length);
   };
@@ -400,7 +515,7 @@ const handleFeatureChange = async (record, e) => {
   const handleAddCounsellor = async () => {
     try {
       const values = await addCounsellorForm.validateFields();
-  
+
       const newData = {
         firstName: values.firstName,
         lastName: values.lastName,
@@ -411,33 +526,31 @@ const handleFeatureChange = async (record, e) => {
         email: values.email,
         isDeleted: false,
         image: selectedImage,
-        totalEarning:"10000",
-        activeTime:"200",
-        available:true,
-        callCount:"26",
-        chatSessions:"5",
-        country:"india",
-        earningsMonth:"1000",
-        isActive:false,
-        rating:"5",
-        totalCallTime:"400",
-        isWaiting:"false",
-        price:"10",
-
+        totalEarning: "10000",
+        activeTime: "200",
+        available: true,
+        callCount: "26",
+        chatSessions: "5",
+        country: "india",
+        earningsMonth: "1000",
+        isActive: false,
+        rating: "5",
+        totalCallTime: "400",
+        isWaiting: "false",
+        price: "10",
       };
       const counsellorRef = doc(firestore, "councellors", values.phone);
-  
+
       await setDoc(counsellorRef, newData);
-  
+
       addCounsellorForm.resetFields();
       setIsModalVisible(false);
-  
+
       fetchDataFromFirestore();
     } catch (error) {
       console.error("Error adding new counsellor:", error);
     }
   };
-  
 
   const handleFileInputChange = (e) => {
     const selectedFile = e.target.files[0];
@@ -459,17 +572,18 @@ const handleFeatureChange = async (record, e) => {
         });
     }
   };
-  
-  
-  const handleEditIconClick = (e,record) => {
+
+  const handleEditIconClick = (e, record) => {
     e.stopPropagation();
     setSelectedUser(record);
     fileInputRef.current.click();
   };
 
-
   const shouldRenderViewAllButton = displayedData.length > 10;
 
+
+
+  
   return (
     <div
       style={{
@@ -482,18 +596,19 @@ const handleFeatureChange = async (record, e) => {
     >
       <Layout />
       <Modal
-  title="Confirm Deletion"
-  open={isDeleteModalVisible}
-  onOk={handleDeleteConfirmed}
-  onCancel={handleDeleteCancelled}
-  okText="Yes"
-  cancelText="No"
->
-  Are you sure you want to delete this user?
-  
-</Modal>
+        title="Confirm Deletion"
+        open={isDeleteModalVisible}
+        onOk={handleDeleteConfirmed}
+        onCancel={handleDeleteCancelled}
+        okText="Yes"
+        cancelText="No"
+      >
+        Are you sure you want to delete this user?
+      </Modal>
 
-      <div style={{ marginTop: "-60px", alignItems: "center" }}>
+      <div
+        style={{ marginTop: "-60px", alignItems: "center", display: "flex" }}
+      >
         <Input
           className="placeholder_search"
           prefix={
@@ -504,24 +619,67 @@ const handleFeatureChange = async (record, e) => {
           }
           placeholder="Search"
           style={{
-            flex: 1,
             width: "352px",
             height: "37px",
             borderRadius: "19px",
-            background: " rgb(235,235,235)",
-            marginBottom: "40px",
+            background: "rgb(235, 235, 235)",
             border: "none",
+            marginBottom: "40px",
             color: "black",
             paddingTop: "5px",
           }}
           value={searchText}
           onChange={(e) => handleSearch(e.target.value)}
         />
+
+        {/* <img
+    className="slider"
+    src="/slider.svg"
+    style={{ paddingLeft:"30px",cursor: "pointer", }}
+    // style={{ paddingLeft:"30px",cursor: "pointer", marginBottom:"36px" }}
+    onClick={handleImageClick} 
+  />
+
+  {isDatePickerVisible && (
+    <Space 
+    // style={{ marginBottom:"36px" }}
+    >
+
+      <RangePicker onChange={handleDateFilter}/>
+    </Space>
+  )}
+</div> */}
         <img
-          className="slider"
           src="/slider.svg"
-          style={{ paddingLeft: "20px", marginBottom: "-9px" }}
+          onClick={handleImageClick}
+          alt="Filter"
+          style={{ cursor: "pointer" }}
         />
+
+        {isFilterListVisible && (
+      
+          <div
+          style={{
+            position: "fixed",
+            bottom: "588px",
+            left: "659px",
+            border: "1px solid #ccc",
+            padding: "10px",
+            backgroundColor: "#fff",
+            zIndex: 1000, 
+          }}
+        >
+
+            <p>date of Joined filter</p>
+            <p>status filter</p>
+            <p> City filter </p>
+            <p>State filter</p>
+            <p> Earning of current month filter</p>
+            <p>Total calls received filter</p>
+           
+            {/* <button onClick={closeFilterList}>Close</button> */}
+          </div>
+        )}
       </div>
 
       <div style={{ marginBottom: 16 }}>
@@ -547,7 +705,7 @@ const handleFeatureChange = async (record, e) => {
         >
           + Add new Counsellor
         </Button>
-          {shouldRenderViewAllButton && (
+        {shouldRenderViewAllButton && (
           <Button
             onClick={loadAllData}
             style={{
@@ -590,25 +748,22 @@ const handleFeatureChange = async (record, e) => {
             <Avatar
               size={64}
               icon={<UserOutlined />}
-              style={{ position: 'relative' }}
+              style={{ position: "relative" }}
               onClick={handleEditIconClick}
-              src={selectedImage} alt="Selected"
-            >
-            
-            </Avatar>
-        
+              src={selectedImage}
+              alt="Selected"
+            ></Avatar>
+
             <input
               type="file"
               ref={fileInputRef}
-              style={{ display: 'none' }}
-               onChange={(e) => handleFileInputChange(e)}
-              
+              style={{ display: "none" }}
+              onChange={(e) => handleFileInputChange(e)}
             />
-        
-            <EditOutlined style={{ marginLeft: '-7px' }} />
-    </div>
 
-         
+            <EditOutlined style={{ marginLeft: "-7px" }} />
+          </div>
+
           <Form form={addCounsellorForm} initialValues={{}}>
             <Form.Item
               label="First Name"
@@ -621,9 +776,7 @@ const handleFeatureChange = async (record, e) => {
                 },
               ]}
             >
-              <Input
-               type="text"
-               inputMode="text"/>
+              <Input type="text" inputMode="text" />
             </Form.Item>
             <Form.Item label="Last Name" name="lastName">
               <Input />
@@ -699,9 +852,8 @@ const handleFeatureChange = async (record, e) => {
             onClick: () => {
               if (!record.isBlocked) {
                 setSelectedUser(record);
-                navigate('/counsellor', { state: { selectedUser: record } });
+                navigate("/counsellor", { state: { selectedUser: record } });
               }
-            
             },
           })}
         />
