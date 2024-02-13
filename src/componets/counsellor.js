@@ -9,6 +9,7 @@ import {
   Space,
   DatePicker,
   Avatar,
+  Radio,
 } from "antd";
 
 import { StarOutlined, StarFilled } from "@ant-design/icons";
@@ -20,26 +21,18 @@ import moment from "moment";
 import {
   collection,
   getDocs,
-  addDoc,
   updateDoc,
   getDoc,
   setDoc,
   doc,
 } from "firebase/firestore";
 
-import {
-  EditOutlined,
-  DeleteOutlined,
-  SearchOutlined,
-  UserOutlined,
-} from "@ant-design/icons";
+import { EditOutlined, DeleteOutlined, UserOutlined } from "@ant-design/icons";
 
 const CounsellorList = () => {
   const navigate = useNavigate();
   const [selectedRowKeys, setSelectedRowKeys] = useState([]);
   const [form] = Form.useForm();
-  const [modalVisible, setModalVisible] = useState(false);
-  const [editModal, setEditModal] = useState(false);
   const [loading, setLoading] = useState(false);
   const [totalRecords, setTotalRecords] = useState(10);
   const [searchText, setSearchText] = useState("");
@@ -48,19 +41,18 @@ const CounsellorList = () => {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
   const [addCounsellorForm] = Form.useForm();
-  const [updateCounsellorForm] = Form.useForm();
   const [selectedItem, setSelectedItem] = useState("");
   const [selectedImage, setSelectedImage] = useState(null);
   const fileInputRef = useRef(null);
   const [isDatePickerVisible, setIsDatePickerVisible] = useState(false);
+  const [isStatusModalVisible, setIsStatusModalVisible] = useState(false);
+  const [isCityModalVisible, setIsCityModalVisible] = useState(false);
+  const [isStateModalVisible, setIsStateModalVisible] = useState(false);
+  const [enteredCity, setEnteredCity] = useState("");
+  const [enteredState, setEnteredState] = useState("");
+  const [stateSearchText, setStateSearchText] = useState("");
   const { RangePicker } = DatePicker;
-  const [selectedCity, setSelectedCity] = useState(null);
-  const [selectedState, setSelectedState] = useState(null);
-  const [selectedStatus, setSelectedStatus] = useState("all");
-  const [minEarnings, setMinEarnings] = useState(null);
-  const [maxEarnings, setMaxEarnings] = useState(null);
-  const [minTotalCalls, setMinTotalCalls] = useState(null);
-  const [maxTotalCalls, setMaxTotalCalls] = useState(null);
+  const [statusFilter, setStatusFilter] = useState(null);
   const [isFilterListVisible, setIsFilterListVisible] = useState(false);
   const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/i;
   const [formData, setFormData] = useState({
@@ -87,6 +79,8 @@ const CounsellorList = () => {
   });
   const [isDeleteModalVisible, setDeleteModalVisible] = useState(false);
   const [userToDelete, setUserToDelete] = useState(null);
+  const [order, setOrder] = useState({ name: 'asc', total: 'asc' });
+  const [filtersApplied, setFiltersApplied] = useState(false);
 
   const showDeleteModal = (id) => {
     setUserToDelete(id);
@@ -186,6 +180,39 @@ const CounsellorList = () => {
     }
   };
 
+
+  
+  useEffect(() => {
+    const sortData = (column, order) => {
+      const sortedData = [...initialData].sort((a, b) => {
+        if (order === 'asc') {
+          return a[column] > b[column] ? 1 : -1;
+        } else {
+          return a[column] < b[column] ? 1 : -1;
+        }
+      });
+      return sortedData;
+    };
+  
+    const sortedData = sortData(selectedItem, order[selectedItem]);
+  
+    setDisplayedData(sortedData);
+  }, [initialData, order, selectedItem]);
+
+
+  const handleClick = (column) => {
+    setOrder(prev => {
+      const newOrder = prev[column] === 'asc' ? 'desc' : 'asc';
+      return { ...prev, [column]: newOrder };
+    });
+    setSelectedItem(column);
+  };
+
+  function getArrow(order) {
+    if (order === 'asc') return '↑';
+    return '↓';
+  }
+
   const columns = [
     {
       title: "Featured Councellor",
@@ -209,80 +236,136 @@ const CounsellorList = () => {
       dataIndex: "id",
       align: "center",
     },
-
     {
-      title: "First Name",
+      title: (
+        <div onClick={() => handleClick('firstName')}>
+          First Name {getArrow(order.firstName)}
+        </div>
+      ),
       dataIndex: "firstName",
       align: "center",
     },
+ 
     {
-      title: "Last Name",
+      title: (
+        <div onClick={() => handleClick('lastName')}>
+         Last Name {getArrow(order.lastName)}
+        </div>
+      ),
       dataIndex: "lastName",
       align: "center",
     },
+  
     {
-      title: "Date Joined",
+      title: (
+        <div onClick={() => handleClick('dateJoined')}>
+         Date Joined {getArrow(order.dateJoined)}
+        </div>
+      ),
       dataIndex: "dateJoined",
       align: "center",
     },
     {
-      title: "Total Calls received",
+      title: (
+        <div onClick={() => handleClick('callCount')}>
+          Total Calls received {getArrow(order.callCount)}
+        </div>
+      ),
       dataIndex: "callCount",
       align: "center",
     },
+   
     {
-      title: "Total active time",
+      title: (
+        <div onClick={() => handleClick('activeTime')}>
+          Total active time {getArrow(order.activeTime)}
+        </div>
+      ),
       dataIndex: "activeTime",
       align: "center",
     },
     {
-      title: "Commutative Total minutes spent on call",
+      title: (
+        <div onClick={() => handleClick('totalCallTime')}>
+         Commutative Total minutes spent on call {getArrow(order.totalCallTime)}
+        </div>
+      ),
       dataIndex: "totalCallTime",
       align: "center",
     },
     {
-      title: "Total chats sessions",
+      title: (
+        <div onClick={() => handleClick('chatSessions')}>
+          Total chats sessions {getArrow(order.chatSessions)}
+        </div>
+      ),
       dataIndex: "chatSessions",
       align: "center",
     },
 
     {
-      title: "Total Earning",
+      title: (
+        <div onClick={() => handleClick('totalEarning')}>
+          Total Earning {getArrow(order.totalEarning)}
+        </div>
+      ),
       dataIndex: "totalEarning",
       align: "center",
     },
     {
-      title: "Earning Of current month",
+      title: (
+        <div onClick={() => handleClick('earningsMonth')}>
+          Earning Of current month {getArrow(order.earningsMonth)}
+        </div>
+      ),
       dataIndex: "earningsMonth",
       align: "center",
     },
-    // {
-    //   title: "Available",
-    //   dataIndex: "available",
-    //   align: "center",
-    // },
+ 
     {
-      title: "Email",
-      dataIndex: "email",
+      title: (
+        <div onClick={() => handleClick('Email')}>
+          Email {getArrow(order.Email)}
+        </div>
+      ),
+      dataIndex: "Email",
       align: "center",
     },
+ 
     {
-      title: "Phone Number ",
+      title: (
+        <div onClick={() => handleClick('phone')}>
+          Phone Number {getArrow(order.phone)}
+        </div>
+      ),
       dataIndex: "phone",
       align: "center",
     },
     {
-      title: "City",
+      title: (
+        <div onClick={() => handleClick('city')}>
+        City {getArrow(order.city)}
+        </div>
+      ),
       dataIndex: "city",
       align: "center",
     },
     {
-      title: "State",
+      title: (
+        <div onClick={() => handleClick('state')}>
+        State {getArrow(order.state)}
+        </div>
+      ),
       dataIndex: "state",
       align: "center",
     },
+  
     {
-      title: "Rating",
+      title: (
+        <div onClick={() => handleClick('rating')}>
+        Rating {getArrow(order.rating)}
+        </div>
+      ),
       dataIndex: "rating",
       align: "center",
     },
@@ -331,7 +414,7 @@ const CounsellorList = () => {
       ),
     },
   ];
-
+  
   const loadAllData = () => {
     setDisplayedData(initialData);
     setTotalRecords(initialData.length);
@@ -378,16 +461,6 @@ const CounsellorList = () => {
     }
   };
 
-  // const handleSearch = (value) => {
-  //   setSearchText(value);
-
-  //   const filteredData = initialData.filter((item) =>
-  //     item.firstName.toLowerCase().includes(value.toLowerCase())
-  //   );
-  //   setDisplayedData(filteredData);
-  //   setTotalRecords(filteredData.length);
-  // };
-
   const handleSearch = (value) => {
     setSearchText(value);
 
@@ -406,36 +479,9 @@ const CounsellorList = () => {
     setTotalRecords(filteredData.length);
   };
 
-  // const handleDateFilter = (dates, dateStrings) => {
-  //   if (dates) {
-  //     const startDate = dates[0].format('YYYY-MM-DD');
-  //     const endDate = dates[1].format('YYYY-MM-DD');
-
-  //     console.log('Start date:', startDate);
-  //     console.log('End date:', endDate);
-
-  //     const filteredData = initialData.filter((item) => {
-  //       const itemDate = moment(item.dateJoined, 'YYYY-MM-DD');
-  //       return itemDate.isBetween(startDate, endDate, null, '[]');
-  //     });
-
-  //     setDisplayedData(filteredData);
-  //     setTotalRecords(filteredData.length);
-  //   }
-  // };
-
-  // const handleImageClick = () => {
-  //   console.log('Image clicked');
-  //   setIsDatePickerVisible(prevState => !prevState);
-  // };
-
   const handleImageClick = () => {
     console.log("Image clicked");
-    setIsFilterListVisible(prevState => !prevState);
-  };
-
-  const closeFilterList = () => {
-    setIsFilterListVisible(false);
+    setIsFilterListVisible((prevState) => !prevState);
   };
 
   const handleDateFilter = (dates, dateStrings) => {
@@ -446,51 +492,101 @@ const CounsellorList = () => {
       console.log("Start date:", startDate);
       console.log("End date:", endDate);
 
-      applyFilters(startDate, endDate);
-    }
-  };
-
-  const applyFilters = (startDate, endDate) => {
-    let filteredData = [...initialData];
-    console.log(filteredData, "filteredDatafilteredData");
-    if (selectedCity) {
-      filteredData = filteredData.filter((item) => item.city === selectedCity);
-    }
-
-    if (selectedState) {
-      filteredData = filteredData.filter(
-        (item) => item.state === selectedState
-      );
-    }
-
-    if (selectedStatus !== "all") {
-      filteredData = filteredData.filter(
-        (item) => item.status === selectedStatus
-      );
-    }
-
-    if (minEarnings !== null && maxEarnings !== null) {
-      filteredData = filteredData.filter((item) => {
-        return item.earnings >= minEarnings && item.earnings <= maxEarnings;
-      });
-    }
-
-    if (minTotalCalls !== null && maxTotalCalls !== null) {
-      filteredData = filteredData.filter((item) => {
-        return (
-          item.totalCalls >= minTotalCalls && item.totalCalls <= maxTotalCalls
-        );
-      });
-    }
-    if (startDate && endDate) {
-      filteredData = filteredData.filter((item) => {
+      const filteredData = initialData.filter((item) => {
         const itemDate = moment(item.dateJoined, "YYYY-MM-DD");
         return itemDate.isBetween(startDate, endDate, null, "[]");
       });
-    }
 
-    setDisplayedData(filteredData);
-    setTotalRecords(filteredData.length);
+      setDisplayedData(filteredData);
+      setTotalRecords(filteredData.length);
+      setIsDatePickerVisible(false);
+      setFiltersApplied(true);
+    }
+  };
+
+  const handleDatePickerClick = () => {
+    setIsDatePickerVisible((prevState) => !prevState);
+    setIsFilterListVisible(false);
+  };
+
+  const handleStatusClick = () => {
+    setIsStatusModalVisible((prevState) => !prevState);
+    setIsFilterListVisible(false);
+  };
+
+  const handleStatusFilterChange = (e) => {
+    const selectedStatus = e.target.value;
+    setStatusFilter(selectedStatus);
+
+    console.log("Selected status:", selectedStatus);
+
+    const filteredCounselors = initialData.filter((counselor) => {
+      return counselor.isActive === (selectedStatus === "active");
+    });
+
+    console.log("Filtered counselors:", filteredCounselors);
+
+    setDisplayedData(filteredCounselors);
+    setTotalRecords(filteredCounselors.length);
+    setIsStatusModalVisible(false);
+    setFiltersApplied(true);
+  };
+
+  const handleStateFilter = (state) => {
+    const filteredCounselors = initialData.filter((counselor) =>
+      counselor.state.toLowerCase().includes(state.toLowerCase())
+    );
+    setDisplayedData(filteredCounselors);
+    setStateSearchText("");
+  };
+
+  const handleEnterPress1 = (e) => {
+    if (e.key === "Enter") {
+      setIsStateModalVisible(false);
+      handleStateFilter(enteredState);
+      setIsFilterListVisible(false);
+      setStateSearchText("");
+    }
+  };
+
+  const handleCityFilter = (city) => {
+    const filteredCounselors = initialData.filter((counselor) =>
+      counselor.city.toLowerCase().includes(city.toLowerCase())
+    );
+    setDisplayedData(filteredCounselors);
+    setStateSearchText("");
+  };
+
+  const handleEnterPress = (e) => {
+    if (e.key === "Enter") {
+      setIsCityModalVisible(false);
+      handleCityFilter(enteredCity);
+      setIsFilterListVisible(false);
+      setStateSearchText("");
+    }
+  };
+
+  const handleCityClick = () => {
+    setIsCityModalVisible((prevState) => !prevState);
+    setStateSearchText("");
+    setIsFilterListVisible(false);
+    setFiltersApplied(true);
+  };
+
+  const handleStateClick = () => {
+    setIsStateModalVisible((prevState) => !prevState);
+    setIsFilterListVisible(false);
+    setFiltersApplied(true);
+    setStateSearchText("");
+  };
+
+  const handleFeaturedCounsellorClick = () => {
+    const featuredCounselors = initialData.filter(
+      (counselor) => counselor.isFeatured
+    );
+    setDisplayedData(featuredCounselors);
+    setIsFilterListVisible(false);
+    setFiltersApplied(true);
   };
 
   const handleDeleteAll = async () => {
@@ -581,9 +677,13 @@ const CounsellorList = () => {
 
   const shouldRenderViewAllButton = displayedData.length > 10;
 
+  const clearFilters = () => {
+    setStatusFilter(null);
+    fetchDataFromFirestore();
+    setFiltersApplied(false);
+    setStateSearchText("");
+  };
 
-
-  
   return (
     <div
       style={{
@@ -632,24 +732,8 @@ const CounsellorList = () => {
           onChange={(e) => handleSearch(e.target.value)}
         />
 
-        {/* <img
-    className="slider"
-    src="/slider.svg"
-    style={{ paddingLeft:"30px",cursor: "pointer", }}
-    // style={{ paddingLeft:"30px",cursor: "pointer", marginBottom:"36px" }}
-    onClick={handleImageClick} 
-  />
-
-  {isDatePickerVisible && (
-    <Space 
-    // style={{ marginBottom:"36px" }}
-    >
-
-      <RangePicker onChange={handleDateFilter}/>
-    </Space>
-  )}
-</div> */}
         <img
+          className="slider"
           src="/slider.svg"
           onClick={handleImageClick}
           alt="Filter"
@@ -657,28 +741,101 @@ const CounsellorList = () => {
         />
 
         {isFilterListVisible && (
-      
           <div
-          style={{
-            position: "fixed",
-            bottom: "588px",
-            left: "659px",
-            border: "1px solid #ccc",
-            padding: "10px",
-            backgroundColor: "#fff",
-            zIndex: 1000, 
-          }}
-        >
+            style={{
+              position: "fixed",
+              bottom: "588px",
+              left: "659px",
+              border: "1px solid #ccc",
+              padding: "10px",
+              backgroundColor: "#fff",
+              zIndex: 1000,
+            }}
+          >
+            <p onClick={handleDatePickerClick}>Date of Joined</p>
 
-            <p>date of Joined filter</p>
-            <p>status filter</p>
-            <p> City filter </p>
-            <p>State filter</p>
-            <p> Earning of current month filter</p>
-            <p>Total calls received filter</p>
-           
-            {/* <button onClick={closeFilterList}>Close</button> */}
+            <p onClick={handleStatusClick}>Status</p>
+
+            <p onClick={handleFeaturedCounsellorClick}>
+              Featured Counsellor List
+            </p>
+
+            <p onClick={handleCityClick}>City</p>
+
+            <p onClick={handleStateClick}>State</p>
           </div>
+        )}
+      </div>
+
+      <Modal
+        title="Select Date Range"
+        visible={isDatePickerVisible}
+        onCancel={handleDatePickerClick}
+        footer={null}
+      >
+        <RangePicker onChange={handleDateFilter} />
+      </Modal>
+
+      <Modal
+        title="Select Status"
+        visible={isStatusModalVisible}
+        onCancel={handleStatusClick}
+        footer={null}
+      >
+        <Radio.Group onChange={handleStatusFilterChange} value={statusFilter}>
+          <Radio value="active">Active</Radio>
+          <Radio value="disabled">Disabled</Radio>
+        </Radio.Group>
+      </Modal>
+
+      <Modal
+        title="Select City"
+        visible={isCityModalVisible}
+        onCancel={handleCityClick}
+        footer={null}
+      >
+        <input
+          type="text"
+          placeholder="Enter City"
+          value={enteredCity}
+          onChange={(e) => setEnteredCity(e.target.value)}
+          onKeyPress={handleEnterPress}
+        />
+      </Modal>
+
+      <Modal
+        title="Select State"
+        visible={isStateModalVisible}
+        onCancel={handleStateClick}
+        footer={null}
+      >
+        <input
+          type="text"
+          placeholder="Enter State"
+          value={enteredState}
+          onChange={(e) => setEnteredState(e.target.value)}
+          onKeyPress={handleEnterPress1}
+        />
+      </Modal>
+
+      <div>
+        {filtersApplied && (
+          <Button
+            style={{
+              backgroundColor: "#18407D",
+              color: "white",
+              position: "absolute",
+              top: 60,
+              right: 950,
+              borderRadius: "15px",
+            }}
+            onClick={() => {
+              console.log("Clear filters button clicked");
+              clearFilters();
+            }}
+          >
+            Clear Filters
+          </Button>
         )}
       </div>
 

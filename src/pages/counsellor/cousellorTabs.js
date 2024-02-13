@@ -312,7 +312,7 @@ const CounsellorTabs = () => {
     setSelectedUser(userId);
     const userDocRef = doc(firestore, 'users', userId);
     const userDocSnapshot = await getDoc(userDocRef);
-    const userName = userDocSnapshot.data().firstName;
+    // const userName = userDocSnapshot.data().firstName;
     const filteredMessages = chatData.filter(item => (item.type === 'counsellor' || (item.type === 'user' && item.receiver_id === userId)));
     setUserMessages(filteredMessages);
   };

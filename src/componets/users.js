@@ -39,6 +39,7 @@ const UserList = () => {
   const [selectedUser, setSelectedUser] = useState(null);
   const [selectedItem, setSelectedItem] = useState("");
   const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/i;
+  const [order, setOrder] = useState({ name: 'asc', total: 'asc' });
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -165,6 +166,36 @@ const UserList = () => {
     }
   };
   
+ 
+  useEffect(() => {
+    const sortData = (column, order) => {
+      const sortedData = [...initialData].sort((a, b) => {
+        if (order === 'asc') {
+          return a[column] > b[column] ? 1 : -1;
+        } else {
+          return a[column] < b[column] ? 1 : -1;
+        }
+      });
+      return sortedData;
+    };
+  
+    const sortedData = sortData(selectedItem, order[selectedItem]);
+  
+    setDisplayedData(sortedData);
+  }, [initialData, order, selectedItem]);
+
+  const handleClick = (column) => {
+    setOrder(prev => {
+      const newOrder = prev[column] === 'asc' ? 'desc' : 'asc';
+      return { ...prev, [column]: newOrder };
+    });
+    setSelectedItem(column);
+  };
+
+  function getArrow(order) {
+    if (order === 'asc') return '↑';
+    return '↓';
+  }
 
   const columns = [
 
@@ -174,32 +205,57 @@ const UserList = () => {
       align: "center",
     },
     {
-      title: "First Name",
+      title: (
+        <div onClick={() => handleClick('firstName')}>
+          First Name {getArrow(order.firstName)}
+        </div>
+      ),
       dataIndex: "firstName",
       align: "center",
     },
     {
-    title: "Last Name",
-    dataIndex: "lastName",
-    align: "center",
-  },
+      title: (
+        <div onClick={() => handleClick('lastName')}>
+         Last Name {getArrow(order.lastName)}
+        </div>
+      ),
+      dataIndex: "lastName",
+      align: "center",
+    },
+    {
+      title: (
+        <div onClick={() => handleClick('phone')}>
+          Phone Number {getArrow(order.phone)}
+        </div>
+      ),
+      dataIndex: "phone",
+      align: "center",
+    },
   {
-    title: "Phone Number ",
-    dataIndex: "phone",
-    align: "center",
-  },
-  {
-    title: "Email",
+    title: (
+      <div onClick={() => handleClick('email')}>
+        Email {getArrow(order.email)}
+      </div>
+    ),
     dataIndex: "email",
     align: "center",
   },
   {
-    title: "City",
+    title: (
+      <div onClick={() => handleClick('city')}>
+      City {getArrow(order.city)}
+      </div>
+    ),
     dataIndex: "city",
     align: "center",
   },
+
   {
-    title: "Country",
+    title: (
+      <div onClick={() => handleClick('country')}>
+      Country {getArrow(order.country)}
+      </div>
+    ),
     dataIndex: "country",
     align: "center",
   },
@@ -301,7 +357,9 @@ const UserList = () => {
       item.lastName.toLowerCase().includes(value.toLowerCase()) ||
       item.id.toLowerCase().includes(value.toLowerCase()) ||
       item.email.toLowerCase().includes(value.toLowerCase()) ||
-      item.phone.includes(value)
+      item.phone.includes(value)||
+      item.city.toLowerCase().includes(value.toLowerCase()) ||
+      item.country.toLowerCase().includes(value.toLowerCase()) 
     );
     setDisplayedData(filteredData);
     setTotalRecords(filteredData.length);
@@ -435,10 +493,10 @@ const UserList = () => {
           onChange={(e) => handleSearch(e.target.value)}
           
         />
-       <img className="slider"
+       {/* <img className="slider"
     src="/slider.svg"
     style={{ paddingLeft:'20px', marginBottom:'-9px' }}
-  />
+  /> */}
          
       </div>
   <div style={{ marginBottom: 16 }}>
