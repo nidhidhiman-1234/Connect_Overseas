@@ -21,7 +21,6 @@ import {
 } from "@ant-design/icons";
 
 
-
 const UserList = () => {
   const navigate = useNavigate();
   const [selectedRowKeys, setSelectedRowKeys] = useState([]);

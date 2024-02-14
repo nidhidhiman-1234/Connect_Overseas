@@ -473,6 +473,8 @@ const CounsellorList = () => {
         item.lastName.toLowerCase().includes(value.toLowerCase()) ||
         item.id.toLowerCase().includes(value.toLowerCase()) ||
         item.email.toLowerCase().includes(value.toLowerCase()) ||
+        item.city.toLowerCase().includes(value.toLowerCase()) ||
+        item.state.toLowerCase().includes(value.toLowerCase()) ||
         item.phone.includes(value)
     );
     setDisplayedData(filteredData);
@@ -743,9 +745,9 @@ const CounsellorList = () => {
         {isFilterListVisible && (
           <div
             style={{
-              position: "fixed",
-              bottom: "588px",
-              left: "659px",
+              // position: "fixed",
+              marginBottom:"-169px",
+              marginLeft: "20px",
               border: "1px solid #ccc",
               padding: "10px",
               backgroundColor: "#fff",
@@ -824,11 +826,11 @@ const CounsellorList = () => {
             style={{
               backgroundColor: "#18407D",
               color: "white",
-              position: "absolute",
-              top: 60,
-              right: 950,
+              bottom: "71px",
+              left: "451px",
               borderRadius: "15px",
             }}
+           
             onClick={() => {
               console.log("Clear filters button clicked");
               clearFilters();
