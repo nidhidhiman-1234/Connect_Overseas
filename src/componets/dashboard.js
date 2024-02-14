@@ -21,13 +21,26 @@ const Dashboard = () => {
           style={{
             position: "absolute",
             top: "25%",
-            // left: "-11px", 
+            marginLeft:"228px",
+            transform: "translateY(-50%)",
+            width: "30px",
+            height: "30px",
+            borderRadius: "50%",
+            backgroundColor: "#ECECEC",
+            zIndex:"1",
+          }}
+        />
+             <div
+          style={{
+            position: "absolute",
+            top: "25%",
             marginLeft:"-9px",
             transform: "translateY(-50%)",
-            width: "22px",
-            height: "22px",
+            width: "30px",
+            height: "30px",
             borderRadius: "50%",
-            backgroundColor: "grey",
+            backgroundColor: "#ECECEC",
+            zIndex:"1",
           }}
         />
       <div

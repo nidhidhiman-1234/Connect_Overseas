@@ -297,7 +297,8 @@ export default function Layout(props: Props) {
           >
             {firebaseData.map((admin) => (
               <ListItem key={admin.id} disablePadding>
-                <ListItemButton>
+                <ListItemButton
+                 onClick={() => handleAvatarClick(admin)}>
                   <ListItemIcon>
                     <Avatar
                       alt={admin.firstName}
@@ -308,7 +309,7 @@ export default function Layout(props: Props) {
                         border: "1px solid",
                         borderColor:"white"
                       }}
-                      onClick={() => handleAvatarClick(admin)}
+                     
                     />
                   </ListItemIcon>
                   <Box>
@@ -333,116 +334,6 @@ export default function Layout(props: Props) {
               </ListItem>
             ))}
           </List>
-
-          {/* <Modal open={openModal} onClose={handleCloseModal}>
-            <Box
-              sx={{
-                position: "absolute",
-                top: "50%",
-                left: "50%",
-                transform: "translate(-50%, -50%)",
-                width: 800,
-                height: 800,
-                bgcolor: "background.paper",
-                boxShadow: 24,
-                p: 4,
-              }}
-            >
-              <Box display="flex" justifyContent="center" mb={2}>
-                {firebaseData.map((admin) => (
-                  <Avatar
-                    key={admin.id}
-                    alt={admin.firstName}
-                    src={admin.image}
-                    style={{
-                      width: "80px",
-                      height: "80px",
-                      border: "2px solid",
-                      position: "relative",
-                    }}
-                  ></Avatar>
-                ))}
-                <IconButton
-                  style={{
-                    position: "absolute",
-                    top: "80px",
-                    right: "355px",
-                    color: "black",
-                  }}
-                  onClick={handleEditIconClick}
-                >
-                  <EditIcon />
-                </IconButton>
-                <input
-                  type="file"
-                  ref={fileInputRef}
-                  style={{ display: "none" }}
-                  onChange={handleFileInputChange}
-                />
-              </Box>
-              <TextField
-                label="Name"
-                fullWidth
-                margin="normal"
-                style={{ width: "60%" }}
-                value={adminDetails.firstName}
-                onChange={(e) =>
-                  setAdminDetails({
-                    ...adminDetails,
-                    firstName: e.target.value,
-                  })
-                }
-              />
-
-              <TextField
-                label="Last Name"
-                fullWidth
-                margin="normal"
-                style={{ width: "60%" }}
-                value={adminDetails.lastName}
-                onChange={(e) =>
-                  setAdminDetails({ ...adminDetails, lastName: e.target.value })
-                }
-              />
-
-              <TextField
-                label="Email"
-                fullWidth
-                margin="normal"
-                style={{ width: "60%" }}
-                value={adminDetails.email}
-                onChange={(e) =>
-                  setAdminDetails({ ...adminDetails, email: e.target.value })
-                }
-              />
-
-              <TextField
-                label="Phone"
-                fullWidth
-                margin="normal"
-                style={{ width: "60%" }}
-                value={adminDetails.phone}
-                onChange={(e) =>
-                  setAdminDetails({ ...adminDetails, phone: e.target.value })
-                }
-              />
-
-              <Box>
-                <Button
-                  variant="contained"
-                  onClick={handleSave}
-                  style={{
-                    width: "20%",
-                    height: "60%",
-                    marginLeft: "145px",
-                    marginTop: "15px",
-                  }}
-                >
-                  Save
-                </Button>
-              </Box>
-            </Box>
-          </Modal> */}
         </>
       </Box>
     </Box>
