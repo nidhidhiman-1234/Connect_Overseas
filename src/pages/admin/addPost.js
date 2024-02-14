@@ -88,20 +88,21 @@ const AddPost = ({}) => {
         clabelCol={{ span: 6 }}
         wrapperCol={{ span: 16 }}
       >
-         <Form.Item label="Title" name="title">
-          <Input
-            style={{ width: "50%", height: 50 }}
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-          />
-        </Form.Item>
-        <Form.Item label="Content" name="content">
-          <Input.TextArea
-            style={{ width: "100%", height: 200 }}
-            value={content}
-            onChange={(e) => setContent(e.target.value)}
-          />
-        </Form.Item>
+        <Form.Item label="Title" name="title">
+  <Input
+    style={{ width: "50%", height: 50, overflow: "hidden", whiteSpace: "nowrap" }}
+    value={title}
+    onChange={(e) => setTitle(e.target.value)}
+  />
+</Form.Item>
+<Form.Item label="Content" name="content">
+  <Input.TextArea
+    style={{ width: "100%", height: 200, overflow: "hidden", whiteSpace: "nowrap" }}
+    value={content}
+    onChange={(e) => setContent(e.target.value)}
+  />
+</Form.Item>
+
 
 <Form.Item label="Image" name="image" getValueFromEvent={() => []}>
   <Upload

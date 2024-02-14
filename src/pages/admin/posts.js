@@ -183,41 +183,36 @@ const Post = () => {
               <Delete />
             </IconButton>
             <Typography
-              style={{
-                marginBottom: "20px",
-                marginTop: "10px",
-                // overflow: "hidden",
-                // textOverflow: "ellipsis",
-                maxHeight: "3em",
-                // whiteSpace: "nowrap",
-              }}
-              variant="h5"
-            >
-              {post.title}
-            </Typography>
-            {/* <Typography variant="body1">
-            <Linkify>{post.content}</Linkify>
-            </Typography> */}
+  style={{
+    marginBottom: "20px",
+    marginTop: "10px",
+    maxHeight: "5em", 
+    overflow: "hidden",
+  }}
+  variant="h5"
+>
+  {post.title}
+</Typography>
 
-            <Typography
-              variant="body1"
-              style={{
-                // overflow: "hidden",
-                // textOverflow: "ellipsis",
-                maxHeight: "4em",
-                // whiteSpace: "nowrap",
-              }}
-            >
-              <Linkify
-                componentDecorator={(decoratedHref, decoratedText, key) => (
-                  <Link to={decoratedHref} target="_blank" key={key}>
-                    {decoratedText}
-                  </Link>
-                )}
-              >
-                {post.content}
-              </Linkify>
-            </Typography>
+<Typography
+  variant="body1"
+  style={{
+    maxHeight: "20em", 
+    overflow: "hidden",
+  }}
+>
+  <Linkify
+    componentDecorator={(decoratedHref, decoratedText, key) => (
+      <Link to={decoratedHref} target="_blank" key={key}>
+        {decoratedText}
+      </Link>
+    )}
+  >
+    {post.content}
+  </Linkify>
+</Typography>
+
+
 
             {post.images && Array.isArray(post.images) && post.images.length > 0 && (
               <div
