@@ -186,7 +186,7 @@ const Post = () => {
   style={{
     marginBottom: "20px",
     marginTop: "10px",
-    maxHeight: "5em", 
+    maxHeight: "150em", 
     overflow: "hidden",
   }}
   variant="h5"
@@ -197,7 +197,7 @@ const Post = () => {
 <Typography
   variant="body1"
   style={{
-    maxHeight: "20em", 
+    maxHeight: "250em", 
     overflow: "hidden",
   }}
 >
