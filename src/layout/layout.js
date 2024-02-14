@@ -47,6 +47,18 @@ interface Props {
 export default function Layout(props: Props) {
   const navigate = useNavigate();
   const { window } = props;
+  const [isClosing, setIsClosing] = React.useState(false);
+
+  const handleDrawerClose = () => {
+    setIsClosing(true);
+    setMobileOpen(false);
+  };
+
+  const handleDrawerTransitionEnd = () => {
+    setIsClosing(false);
+  };
+
+
   const [mobileOpen, setMobileOpen] = React.useState(false);
   const [selectedItem, setSelectedItem] = useState("");
 
@@ -442,7 +454,7 @@ export default function Layout(props: Props) {
   return (
     <Box sx={{ display: "flex" }}>
       <CssBaseline />
-
+ 
       <Toolbar>
         <IconButton
           color="inherit"
@@ -454,6 +466,7 @@ export default function Layout(props: Props) {
           <MenuIcon />
         </IconButton>
       </Toolbar>
+    
       <Box
         component="nav"
         sx={{ width: { sm: drawerWidth }, flexShrink: { sm: 0 } }}
@@ -463,7 +476,8 @@ export default function Layout(props: Props) {
           container={container}
           variant="temporary"
           open={mobileOpen}
-          onClose={handleDrawerToggle}
+          onClose={handleDrawerClose}
+          onTransitionEnd={handleDrawerTransitionEnd}
           ModalProps={{
             keepMounted: true,
           }}

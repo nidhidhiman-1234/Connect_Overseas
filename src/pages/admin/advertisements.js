@@ -5,7 +5,7 @@ import { firestore, storage } from "../../config/firebase.js";
 import { useNavigate, useLocation } from "react-router-dom";
 import AdvertisementModal from "./advertisementEditModal.js";
 import { CheckOutlined, CloseOutlined } from '@ant-design/icons';
-import { Card, Space, Rate,Switch } from "antd";
+import { Card, Space, Rate,Switch,Modal } from "antd";
 import { Delete, Edit } from "@mui/icons-material";
 
 import {
@@ -25,6 +25,8 @@ const Advertisement = () => {
   const [selectedAdvertisement, setSelectedAdvertisement] = useState(null);
   const [isModalOpen, setModalOpen] = useState(false);
   const [switchState, setSwitchState] = useState(true);
+  const [isDeleteModalVisible, setDeleteModalVisible] = useState(false);
+  const [selectedAdvertisementId, setSelectedAdvertisementId] = useState(null);  
 
   const truncateContent = (content) => {
     if (content?.length > maxContentLength) {
@@ -69,6 +71,30 @@ const Advertisement = () => {
       console.error("Error deleting advertisement:", error);
     }
   };
+
+  const handleDeleteClick = (advertisementId) => {
+    setSelectedAdvertisementId(advertisementId);
+    setDeleteModalVisible(true);
+  };
+
+  const handleDeleteConfirmed = async () => {
+    try {
+      await deleteDoc(doc(firestore, "advertisements", selectedAdvertisementId));
+      setAdvertisements((prevAdvertisements) =>
+        prevAdvertisements.filter((ad) => ad.id !== selectedAdvertisementId)
+      );
+      console.log("Advertisement deleted successfully");
+      setDeleteModalVisible(false);
+    } catch (error) {
+      console.error("Error deleting advertisement:", error);
+    }
+  };
+
+  const handleDeleteCancelled = () => {
+    setDeleteModalVisible(false);
+  };
+
+
   
   const handleEditClick = (advertisement) => {
     setSelectedAdvertisement(advertisement);
@@ -107,7 +133,17 @@ const Advertisement = () => {
       }}
     >
       <Layout />
-    
+      <Modal
+        title="Confirm Deletion"
+        open={isDeleteModalVisible}
+        onOk={handleDeleteConfirmed}
+        onCancel={handleDeleteCancelled}
+        okText="Yes"
+        cancelText="No"
+      >
+        Are you sure you want to delete this advertisement?
+      </Modal>
+
       <Space direction="vertical" size={16}>
       <Button
           variant="contained"
@@ -123,108 +159,74 @@ const Advertisement = () => {
       {advertisements.map((advertisement) => (
         <Card
         key={advertisement.id}
-          style={{
-            width: "250%",
-            maxWidth: 550,
-            maxHeight: 400,
-            borderRadius: 20,
-            boxShadow: "0 4px 12px rgba(0, 0, 0, 0.2)",
-            position: "relative",
-            border: "2px solid #e8e8e8",
-            backgroundColor: "#122534",
-            color: "white",
-          }}
-        >
-     
-            <div style={{ position: "relative" }}>
-            
+        style={{
+          width: "100%",
+          maxWidth: 550,
+          borderRadius: 20,
+          boxShadow: "0 4px 12px rgba(0, 0, 0, 0.2)",
+          position: "relative",
+          border: "2px solid #e8e8e8",
+          backgroundColor: "#122534",
+          color: "white",
+        }}
+      >
+        <div style={{ position: "relative", display: "flex" }}>
+          <div style={{ flex: "1" }}>
             <Space>
-            <Switch
-             checkedChildren={<CheckOutlined />}
-             unCheckedChildren={<CloseOutlined />}
-             defaultChecked
+              <Switch
+                checkedChildren={<CheckOutlined />}
+                unCheckedChildren={<CloseOutlined />}
+                defaultChecked={advertisement.active}
                 checked={advertisement.active}
-                onChange={(checked) =>
-                  handleChange(checked, advertisement.id)
-                }
+                onChange={(checked) => handleChange(checked, advertisement.id)}
               />
-              {advertisement.active ? 'Active' : 'Inactive'}
-      
-    </Space>
-   
+              {advertisement.active ? "Active" : "Inactive"}
+            </Space>
+          </div>
+  
+          <div style={{ position: "absolute", top: 0, right: 0 }}>
             <IconButton
-              style={{
-                position: "absolute",
-                top: "-10px",
-                left: "400px",
-                color: "#1976D2",
-              }}
+              style={{ color: "#1976D2" }}
               onClick={() => handleEditClick(advertisement)}
             >
               <Edit />
             </IconButton>
-            <AdvertisementModal
-              isOpen={isModalOpen}
-              onClose={() => setModalOpen(false)}
-              selectedAdvertisement={selectedAdvertisement}
-            />
-
-<IconButton
-                style={{
-                  position: "absolute",
-                  top: "-10px",
-                  right: "10px",
-                  color: "#1976D2",
-                }}
-                onClick={() => handleDeleteAdvertisement(advertisement.id)}
-              >
-                <Delete/>
-              </IconButton>
-
-          <div style={{ padding: "10px", overflow: "hidden" }}>
-            
-          <div style={{ position: "absolute", top: 60, left: 30, width: "60%" }}>
-      <img src={advertisement.logo} alt="Logo" style={{ width: "50%" }} />
-    </div>
-            <div style={{ marginLeft: "45%", padding: "10px", color: "white" }}>
-            <h2>{advertisement.title}</h2>
-
-            <div
-        className="star"
-        style={{
-          display: "flex",
-          alignItems: "center",
-          marginBottom: "10px",
-        }}
-      >
-        <Rate
-          value={advertisement.rating}
-          style={{ color: '#FFD700' }}
-          disabled
-        />
-      </div>
-
-              <p style={{ wordWrap: "break-word", wordBreak: "break-all" }}>
-                 {truncateContent(advertisement.description)}
-              </p>
-
-              <Button
-  style={{
-    backgroundColor: "#23488B",
-    color: "white",
-    height: "40px",
-    width: "216px",
-  }}
-  type="primary"
-  onClick={() => handleContactNowClick(advertisement.link)}
->
-  Contact Now
-</Button>
-
-            </div>
+            <IconButton
+              style={{ color: "#1976D2" }}
+              onClick={() => handleDeleteClick(advertisement.id)}
+            >
+              <Delete />
+            </IconButton>
+          </div>
+        </div>
+  
+        <div style={{ display: "flex", padding: "10px", overflow: "hidden" }}>
+          <div style={{ flex: "1", marginRight: "60px",display: "flex", justifyContent: "center", alignItems: "center"  }}>
+            <div style={{ width: "80%" }}>
+              <img src={advertisement.logo} alt="Logo" style={{ width: "150%" }} />
             </div>
           </div>
-        </Card>
+          <div style={{ flex: "2",wordWrap: "break-word", wordBreak: "break-all" }}>
+            <h2>{advertisement.title}</h2>
+  
+            <div className="star" style={{ display: "flex", alignItems: "center", marginBottom: "10px" }}>
+              <Rate value={advertisement.rating} style={{ color: "#FFD700" }} disabled />
+            </div>
+  
+            <p style={{ wordWrap: "break-word", wordBreak: "break-all" }}>
+              {truncateContent(advertisement.description)}
+            </p>
+  
+            <Button
+              style={{ backgroundColor: "#23488B", color: "white", height: "40px", width: "216px" }}
+              type="primary"
+              onClick={() => handleContactNowClick(advertisement.link)}
+            >
+              Contact Now
+            </Button>
+          </div>
+        </div>
+      </Card>
           ))}
       </Space>
 

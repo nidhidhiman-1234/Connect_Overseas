@@ -1,29 +1,10 @@
 import React, { useState, useEffect, useContext } from "react";
 import Layout from "../layout/layout.js";
-import { Box, Typography, Paper, Button, IconButton } from "@mui/material";
-import { firestore, storage } from "../config/firebase";
-import { useNavigate, useLocation } from "react-router-dom";
-import { Delete, Edit } from "@mui/icons-material";
-import PostModal from "../pages/admin/postEditModal.js";
-import Linkify from "react-linkify";
-import { Link } from "react-router-dom";
-import ImageModal from "../utils/ImageModal.js";
-import { Card, Space, Rate } from "antd";
-import { StarFilled } from "@ant-design/icons";
-
-import {
-  collection,
-  getDocs,
-  addDoc,
-  updateDoc,
-  deleteDoc,
-  doc,
-  orderBy,
-  query,
-} from "firebase/firestore";
+import { UserOutlined } from '@ant-design/icons';
+import { Avatar, Space } from 'antd';
 
 const Dashboard = () => {
- 
+
 
   return (
     <div
@@ -36,9 +17,57 @@ const Dashboard = () => {
       }}
     >
       <Layout />
-    
+      <div
+          style={{
+            position: "absolute",
+            top: "25%",
+            // left: "-11px", 
+            marginLeft:"-9px",
+            transform: "translateY(-50%)",
+            width: "22px",
+            height: "22px",
+            borderRadius: "50%",
+            backgroundColor: "grey",
+          }}
+        />
+      <div
+        style={{
+          width: "250px",
+          height: "250px", 
+          border: "1px solid grey",
+          borderRadius: "14px",
+          position: "relative",
+        }}
+      >
+       <div
+       style={{
+       marginTop:"22px",
+       marginLeft:"21px",
+       fontSize:"18px",
+      fontWeight:"550",
 
+      }}>Top Counsellor</div>
+
+        <div
+          style={{
+            position: "absolute",
+            top: "50%",
+            left: "50%",
+            transform: "translate(-50%, -50%)",
+            borderRadius: "50%",
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+          }}
+        >
+          <Space wrap size={16}>
+      <Avatar size={80} icon={<UserOutlined />} />
+    </Space>
+        </div>
+   
+      </div>
     </div>
   );
 };
 export default Dashboard;
+

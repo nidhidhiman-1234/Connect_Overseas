@@ -94,8 +94,8 @@ const AddAdvertisement = () => {
           name="title"
           rules={[{ required: true, message: "Please enter the title!" },
           {
-            max: 70,
-            message: "Title should be maximum 70 characters!",
+            max: 15,
+            message: "Title should be maximum 15 characters!",
           },]}
         >
           <Input value={title} onChange={(e) => setTitle(e.target.value)} />
