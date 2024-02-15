@@ -191,6 +191,11 @@ const Advertisement = () => {
             >
               <Edit />
             </IconButton>
+            <AdvertisementModal
+              isOpen={isModalOpen}
+              onClose={() => setModalOpen(false)}
+              selectedAdvertisement={selectedAdvertisement}
+            />
             <IconButton
               style={{ color: "#1976D2" }}
               onClick={() => handleDeleteClick(advertisement.id)}

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useContext } from "react";
 import Layout from "../layout/layout.js";
-import { UserOutlined } from '@ant-design/icons';
+import { UserOutlined,LeftOutlined,RightOutlined} from '@ant-design/icons';
 import { Avatar, Space } from 'antd';
 
 const Dashboard = () => {
@@ -16,33 +16,45 @@ const Dashboard = () => {
         width: "97.5%",
       }}
     >
+   
       <Layout />
       <div
-          style={{
-            position: "absolute",
-            top: "25%",
-            marginLeft:"228px",
-            transform: "translateY(-50%)",
-            width: "30px",
-            height: "30px",
-            borderRadius: "50%",
-            backgroundColor: "#ECECEC",
-            zIndex:"1",
-          }}
-        />
-             <div
-          style={{
-            position: "absolute",
-            top: "25%",
-            marginLeft:"-9px",
-            transform: "translateY(-50%)",
-            width: "30px",
-            height: "30px",
-            borderRadius: "50%",
-            backgroundColor: "#ECECEC",
-            zIndex:"1",
-          }}
-        />
+  style={{
+    position: "fixed",
+    top: "25%",
+    left: "283px", 
+    transform: "translateY(-50%)",
+    width: "30px",
+    height: "30px",
+    borderRadius: "50%",
+    backgroundColor: "#ECECEC",
+    zIndex: "1",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+  }}
+>
+  <LeftOutlined style={{ color: "black" }} />
+</div>
+
+<div
+  style={{
+    position: "fixed",
+    top: "25%",
+    right:"71.5%",
+    transform: "translateY(-50%)",
+    width: "30px",
+    height: "30px",
+    borderRadius: "50%",
+    backgroundColor: "#ECECEC",
+    zIndex: "1",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+  }}
+>
+  <RightOutlined style={{ color: "black" }} />
+</div>
       <div
         style={{
           width: "250px",
@@ -50,6 +62,7 @@ const Dashboard = () => {
           border: "1px solid grey",
           borderRadius: "14px",
           position: "relative",
+          marginLeft:"10px",
         }}
       >
        <div
@@ -79,6 +92,20 @@ const Dashboard = () => {
         </div>
    
       </div>
+      <div
+        style={{
+          width: "502px",
+          height: "161px", 
+          border: "1px solid grey",
+          borderRadius: "9px",
+          position: "relative",
+          marginLeft:"10px",
+          marginTop:"72px",
+          boxShadow: "2px 8px 16px rgba(217, 217, 217, 0.5)",
+          backgroundColor: "#ffffff",
+        }}
+      >
+        </div>
     </div>
   );
 };
