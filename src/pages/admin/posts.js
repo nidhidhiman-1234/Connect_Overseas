@@ -126,7 +126,7 @@ const Post = () => {
             key={post.id}
             elevation={3}
             style={{
-              padding: "20px",
+              padding: "28px",
               textAlign: "center",
               maxWidth: "600px",
               margin: "20px",
@@ -135,6 +135,8 @@ const Post = () => {
               borderRadius: "15px",
               boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
               overflow: "auto",
+              scrollbarWidth: "thin", 
+    scrollbarColor: "#ccc #f4f4f4",
             }}
           >
             <Typography
@@ -182,6 +184,7 @@ const Post = () => {
                 marginTop: "10px",
                 maxHeight: "150em",
                 overflow: "hidden",
+                wordWrap: "break-word", wordBreak: "break-all"
               }}
               variant="h5"
             >
@@ -193,6 +196,7 @@ const Post = () => {
               style={{
                 maxHeight: "250em",
                 overflow: "hidden",
+                wordWrap: "break-word", wordBreak: "break-all"
               }}
             >
               <Linkify

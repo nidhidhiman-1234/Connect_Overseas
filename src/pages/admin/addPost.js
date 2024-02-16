@@ -98,7 +98,9 @@ const AddPost = ({}) => {
     
   />
 </Form.Item>
-<Form.Item label="Content" name="content">
+<Form.Item label="Content" name="content"
+     rules={[{max: 500,message: "Title should be maximum 500 characters!",
+    },]}>
   <Input.TextArea
     style={{ width: "100%", height: 200, overflow: "hidden", whiteSpace: "nowrap" }}
     value={content}
